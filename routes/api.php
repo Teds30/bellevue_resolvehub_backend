@@ -1,0 +1,78 @@
+<?php
+
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\IssueController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PositionController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserController;
+use App\Models\Department;
+use App\Models\Project;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
+*/
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Route::get('positions', [PositionController::class, "index"]);
+Route::get('positions/{id}', [PositionController::class, "show"]);
+Route::post('positions', [PositionController::class, "store"]);
+Route::patch('positions/{id}', [PositionController::class, "update"]);
+Route::delete('positions/{id}', [PositionController::class, "destroy"]);
+
+
+Route::get('departments', [DepartmentController::class, "index"]);
+Route::get('departments/{id}', [DepartmentController::class, "show"]);
+Route::post('departments', [DepartmentController::class, "store"]);
+Route::patch('departments/{id}', [DepartmentController::class, "update"]);
+Route::delete('departments/{id}', [DepartmentController::class, "destroy"]);
+
+
+Route::get('issues', [IssueController::class, "index"]);
+Route::get('issues/{id}', [IssueController::class, "show"]);
+Route::post('issues', [IssueController::class, "store"]);
+Route::patch('issues/{id}', [IssueController::class, "update"]);
+Route::delete('issues/{id}', [IssueController::class, "destroy"]);
+
+
+Route::get('task_images', [IssueController::class, "index"]);
+Route::get('task_images/{id}', [IssueController::class, "show"]);
+Route::post('task_images', [IssueController::class, "store"]);
+Route::patch('task_images/{id}', [IssueController::class, "update"]);
+Route::delete('task_images/{id}', [IssueController::class, "destroy"]);
+
+Route::get('users/{id}', [UserController::class, "show"]);
+Route::post('users', [UserController::class, "store"]);
+Route::patch('users/{id}', [UserController::class, "update"]);
+Route::delete('users/{id}', [UserController::class, "destroy"]);
+
+Route::get('tasks', [TaskController::class, "index"]);
+Route::get('tasks/{id}', [TaskController::class, "show"]);
+Route::post('tasks', [TaskController::class, "store"]);
+Route::patch('tasks/{id}', [TaskController::class, "update"]);
+Route::delete('tasks/{id}', [TaskController::class, "destroy"]);
+
+Route::get('projects', [ProjectController::class, "index"]);
+Route::get('projects/{id}', [ProjectController::class, "show"]);
+Route::post('projects', [ProjectController::class, "store"]);
+Route::patch('projects/{id}', [ProjectController::class, "update"]);
+Route::delete('projects/{id}', [ProjectController::class, "destroy"]);
+
+Route::get('notifications', [NotificationController::class, "index"]);
+Route::get('notifications/{id}', [NotificationController::class, "show"]);
+Route::post('notifications', [NotificationController::class, "store"]);
+Route::patch('notifications/{id}', [NotificationController::class, "update"]);
+Route::delete('notifications/{id}', [NotificationController::class, "destroy"]);
