@@ -65,6 +65,8 @@ class PositionController extends Controller
             ], 404);
         }
 
+        $res->people;
+
         return [
             "data" => $res,
             "success" => true,

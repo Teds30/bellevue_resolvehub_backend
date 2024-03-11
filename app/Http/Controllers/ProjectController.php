@@ -81,6 +81,19 @@ class ProjectController extends Controller
             ], 404);
         }
 
+
+        $res->department;
+        $res->requestor->department;
+        $res->incharge;
+        $res->pending_marker;
+        $res->completed_marker;
+
+        if ($res->assignee) $res->assignee->department;
+        if ($res->assignor) $res->assignor->department;
+        if ($res->pending_marker) $res->pending_marker->department;
+        if ($res->completed_marker) $res->completed_marker->department;
+
+
         return [
             "data" => $res,
             "success" => true,

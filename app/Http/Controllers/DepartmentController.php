@@ -57,6 +57,8 @@ class DepartmentController extends Controller
             ], 404);
         }
 
+        $res->positions;
+
         return [
             "data" => $res,
             "success" => true,
