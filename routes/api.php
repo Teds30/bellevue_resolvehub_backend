@@ -6,9 +6,11 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskImageController;
 use App\Http\Controllers\UserController;
 use App\Models\Department;
 use App\Models\Project;
+use App\Models\Task_Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,11 +50,11 @@ Route::patch('issues/{id}', [IssueController::class, "update"]);
 Route::delete('issues/{id}', [IssueController::class, "destroy"]);
 
 
-Route::get('task_images', [IssueController::class, "index"]);
-Route::get('task_images/{id}', [IssueController::class, "show"]);
-Route::post('task_images', [IssueController::class, "store"]);
-Route::patch('task_images/{id}', [IssueController::class, "update"]);
-Route::delete('task_images/{id}', [IssueController::class, "destroy"]);
+// Route::get('task_images', [IssueController::class, "index"]);
+// Route::get('task_images/{id}', [IssueController::class, "show"]);
+Route::post('task_images', [TaskImageController::class, "store"]);
+// Route::patch('task_images/{id}', [IssueController::class, "update"]);
+// Route::delete('task_images/{id}', [IssueController::class, "destroy"]);
 
 Route::get('users/{id}', [UserController::class, "show"]);
 Route::post('users', [UserController::class, "store"]);
@@ -76,3 +78,5 @@ Route::get('notifications/{id}', [NotificationController::class, "show"]);
 Route::post('notifications', [NotificationController::class, "store"]);
 Route::patch('notifications/{id}', [NotificationController::class, "update"]);
 Route::delete('notifications/{id}', [NotificationController::class, "destroy"]);
+
+//TODO: Permissions
