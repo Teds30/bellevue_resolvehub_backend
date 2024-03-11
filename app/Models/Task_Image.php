@@ -10,6 +10,8 @@ class Task_Image extends Model
 {
     use HasFactory;
 
+    protected $table = 'task_images';
+
     protected $fillable = [
         'task_id',
         'url',
