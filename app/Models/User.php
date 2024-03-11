@@ -56,4 +56,16 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
 }

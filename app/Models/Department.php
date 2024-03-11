@@ -8,9 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Department extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'name',
         'd_status',
     ];
+
+    public function positions()
+    {
+        return $this->hasMany(Position::class);
+    }
 }
