@@ -22,6 +22,7 @@ class Task extends Model
         'action_taken',
         'remarks',
         'assignee_id',
+        'assignor_id',
         'status',
         'priority',
         'schedule',
@@ -40,6 +41,10 @@ class Task extends Model
     {
         return $this->belongsTo(User::class, 'assignee_id');
     }
+    public function assignor()
+    {
+        return $this->belongsTo(User::class, 'assignor_id');
+    }
     public function pending_marker()
     {
         return $this->belongsTo(User::class, 'pending_marker_id');
@@ -51,5 +56,10 @@ class Task extends Model
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function task_images()
+    {
+        return $this->hasMany(Task_Image::class);
     }
 }

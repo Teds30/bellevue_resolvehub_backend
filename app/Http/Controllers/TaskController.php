@@ -56,11 +56,12 @@ class TaskController extends Controller
             'pending_reason' => 'nullable|string',
             'action_taken' => 'nullable|string',
             'remarks' => 'nullable|string',
-            'asignee_id' => 'nullable|integer',
+            'assignee_id' => 'nullable|integer',
+            'assignor_id' => 'nullable|integer',
             'status' => 'nullable|string',
             'priority' => 'nullable|integer',
             'schedule' => 'nullable|date_format:Y-m-d H:i',
-            'd_status' => 'required|integer',
+            'd_status' => 'nullable|integer',
         ]);
         $res = Task::create($request->all());
         return  response()->json($res, 201);
@@ -83,11 +84,18 @@ class TaskController extends Controller
 
 
         $res->issue;
-        $res->requestor;
         $res->department;
+        $res->requestor->department;
         $res->assignee;
+        $res->assignor;
         $res->pending_marker;
         $res->completed_marker;
+
+        if ($res->assignee) $res->assignee->department;
+        if ($res->assignor) $res->assignor->department;
+        if ($res->pending_marker) $res->pending_marker->department;
+        if ($res->completed_marker) $res->completed_marker->department;
+
 
         return [
             "data" => $res,

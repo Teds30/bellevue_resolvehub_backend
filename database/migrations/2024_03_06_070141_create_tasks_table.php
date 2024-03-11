@@ -24,6 +24,7 @@ return new class extends Migration
             $table->text('action_taken')->nullable();
             $table->text('remarks')->nullable();
             $table->unsignedBigInteger('assignee_id')->nullable();
+            $table->unsignedBigInteger('assignor_id')->nullable();
             $table->tinyInteger('status')->default(0)->comment('0 -> requested | 1 -> pending | 2 -> on-going -> 3 -> cancelled');
             $table->tinyInteger('priority')->nullable();
             $table->timestamp('schedule')->nullable();
@@ -37,6 +38,7 @@ return new class extends Migration
             $table->foreign('pending_marker_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('completed_marker_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('assignee_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('assignor_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 
