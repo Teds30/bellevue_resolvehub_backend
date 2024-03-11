@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('positions', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->unsignedBigInteger('department_id')->nullable();
             $table->tinyInteger('d_status')->default(1);
             $table->timestamps();
+
+            $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
         });
     }
 
