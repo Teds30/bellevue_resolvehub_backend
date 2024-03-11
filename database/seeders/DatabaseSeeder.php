@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Models\Department;
 use App\Models\Issue;
+use App\Models\Permission;
 use App\Models\Position;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -24,10 +25,6 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        Position::factory()->count(2)->sequence(
-            ['name' => 'Receptionist'],
-            ['name' => 'Guest Relations Supervisor'],
-        )->create();
 
         Department::factory()->count(3)->sequence(
             ['name' => 'Front-Office'],
@@ -35,11 +32,20 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Housekeeping'],
         )->create();
 
+        Position::factory()->count(2)->sequence(
+            ['name' => 'Receptionist', "department_id" => 1],
+            ['name' => 'Guest Relations Supervisor', "department_id" => 1],
+        )->create();
+
         Issue::factory()->count(2)->sequence(
             ['name' => 'Network: No internet'],
             ['name' => 'Network: Slow internet'],
         )->create();
 
+        Permission::factory()->count(2)->sequence(
+            ['position_id' => 1, 'access_name' => 'metrics'],
+            ['position_id' => 2, 'access_name' => 'can_createissue'],
+        )->create();
 
         User::factory()->count(1)->create();
     }
