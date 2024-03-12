@@ -32,7 +32,7 @@ class UserFactory extends Factory
             'position_id' => Position::pluck('id')->random(),
             'department_id' => Department::pluck('id')->random(),
             'username' => $fname,
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => 'a',
             'remember_token' => Str::random(10),
         ];
     }

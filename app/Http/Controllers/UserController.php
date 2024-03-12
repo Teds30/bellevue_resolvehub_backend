@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Amenity;
+use App\Models\Task;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -72,6 +74,18 @@ class UserController extends Controller
         ];
     }
 
+    public function user_data(Request $request)
+    {
+        // return $request;
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['data' => [], 'success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        return response()->json(['data' => $user, 'success' => true, 'message' => null], 200);
+    }
+
 
     public function update(Request $request, $id)
     {
@@ -110,6 +124,98 @@ class UserController extends Controller
         return [
             "success" => true,
             "message" => "Successfully deleted."
+        ];
+    }
+
+
+    public function user_assigned_tasks($user_id)
+    {
+
+        $res = User::get()->where('id', $user_id)->first();
+
+        $department = $res->department;
+
+
+        $res2 = Task::get()
+            ->where('department_id', $department->id)
+            ->where('schedule', null)
+            ->where('d_status', 1)
+            ->where('assignee_id', null)
+            ->values();
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No assigned tasks found."
+            ], 404);
+        }
+
+        return [
+            "data" => $res2,
+            "success" => true,
+        ];
+    }
+
+
+    public function user_ongoing_tasks($user_id)
+    {
+
+        $res = User::get()->where('id', $user_id)->first();
+
+        $department = $res->department;
+
+
+        $res2 = Task::where('assignee_id', $user_id)
+            ->whereDate('schedule', Carbon::today())
+            ->where('d_status', 1)
+            ->get()
+            ->values();
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No On-Going tasks found."
+            ], 404);
+        }
+
+        return [
+            "data" => $res2,
+            "success" => true,
+        ];
+    }
+
+
+    public function user_pending_tasks($user_id)
+    {
+
+        $res = User::get()->where('id', $user_id)->first();
+
+        $department = $res->department;
+
+        $res2 = Task::where('assignee_id', $user_id)
+            ->whereDate('schedule', '>', Carbon::today())
+            ->where('completed_marker_id', null)
+            ->where('d_status', 1)
+            ->get()
+            ->values();
+
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No pending tasks found."
+            ], 404);
+        }
+
+        return [
+            "data" => $res2,
+            "success" => true,
         ];
     }
 }
