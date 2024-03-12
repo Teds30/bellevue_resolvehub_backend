@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\NotificationController;
@@ -60,6 +61,9 @@ Route::get('users/{id}', [UserController::class, "show"]);
 Route::post('users', [UserController::class, "store"]);
 Route::patch('users/{id}', [UserController::class, "update"]);
 Route::delete('users/{id}', [UserController::class, "destroy"]);
+Route::get('user_assigned_tasks/{id}', [UserController::class, "user_assigned_tasks"]);
+Route::get('user_ongoing_tasks/{id}', [UserController::class, "user_ongoing_tasks"]);
+Route::get('user_pending_tasks/{id}', [UserController::class, "user_pending_tasks"]);
 
 Route::get('tasks', [TaskController::class, "index"]);
 Route::get('tasks/{id}', [TaskController::class, "show"]);
@@ -80,3 +84,10 @@ Route::patch('notifications/{id}', [NotificationController::class, "update"]);
 Route::delete('notifications/{id}', [NotificationController::class, "destroy"]);
 
 //TODO: Permissions
+
+Route::post('login', [AuthController::class, "login"]);
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('user_data', [UserController::class, "user_data"]);
+});
+// Route::post('register', [AuthController::class, "register"]);
