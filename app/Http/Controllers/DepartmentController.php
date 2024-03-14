@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Department;
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class DepartmentController extends Controller
@@ -58,6 +59,30 @@ class DepartmentController extends Controller
         }
 
         $res->positions;
+
+        return [
+            "data" => $res,
+            "success" => true,
+        ];
+    }
+
+
+    public function department_employees($id)
+    {
+        $res = User::get()->where('department_id', $id)->where('d_status', 1);
+
+        if (!$res || !$res->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "Department not found."
+            ], 404);
+        }
+
+        foreach ($res as $user) {
+
+            $user->position;
+        }
 
         return [
             "data" => $res,
