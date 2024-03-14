@@ -15,46 +15,46 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         // Check if the user with the provided email already exists
-        // $userExist = User::where('email', $request['email'])->first();
+        $userExist = User::where('username', $request['username'])->first();
 
-        // if ($userExist) {
-        //     return response([
-        //         'message' => 'Email already exist.'
-        //     ], 401);
-        // }
+        if ($userExist) {
+            return response([
+                'message' => 'User already exist.'
+            ], 401);
+        }
 
-        // $fields = $request->validate([
-        //     'first_name' => 'required|string',
-        //     'middle_name' => 'string',
-        //     'last_name' => 'required|string',
-        //     'gender' => 'required|string',
-        //     'phone_number' => 'required|string',
-        //     'user_type_id' => 'required|string',
-        //     'email' => 'required|string|unique:users,email',
-        //     'password' => 'required|string|confirmed',
-        // ]);
 
-        // $user = User::create([
-        //     'first_name' => $fields['first_name'],
-        //     'middle_name' => $fields['middle_name'] ?? '',
-        //     'last_name' => $fields['last_name'],
-        //     'gender' => $fields['gender'],
-        //     'phone_number' => $fields['phone_number'],
-        //     'user_type_id' => $fields['user_type_id'],
-        //     'email' => $fields['email'],
-        //     'password' => $fields['password'],
-        // ]);
+        $fields = $request->validate([
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'position_id' => 'required|integer',
+            'department_id' => 'required|integer',
+            'phone_number' => 'required|string',
+            'username' => 'required|string',
+            'password' => 'required|string|confirmed',
+        ]);
 
-        // $user = User::find($user->id);
 
-        // $token = $user->createToken('myapptoken')->plainTextToken;
+        $user = User::create([
+            'first_name' => $fields['first_name'],
+            'last_name' => $fields['last_name'],
+            'position_id' => $fields['position_id'],
+            'department_id' => $fields['department_id'],
+            'phone_number' => $fields['phone_number'],
+            'username' => $fields['username'],
+            'password' => $fields['password'],
+        ]);
 
-        // $response = [
-        //     'user' => $user,
-        //     'token' => $token
-        // ];
+        $user = User::find($user->id);
 
-        // return response($response, 201);
+        $token = $user->createToken('myapptoken')->plainTextToken;
+
+        $response = ['data' => [
+            'user' => $user,
+            'token' => $token
+        ], 'success' => true, 'message' => null];
+
+        return response($response, 201);
     }
 
     public function login(Request $request)

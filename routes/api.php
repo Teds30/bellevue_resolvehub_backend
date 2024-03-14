@@ -42,6 +42,7 @@ Route::get('departments/{id}', [DepartmentController::class, "show"]);
 Route::post('departments', [DepartmentController::class, "store"]);
 Route::patch('departments/{id}', [DepartmentController::class, "update"]);
 Route::delete('departments/{id}', [DepartmentController::class, "destroy"]);
+Route::get('department_employees/{id}', [DepartmentController::class, "department_employees"]);
 
 
 Route::get('issues', [IssueController::class, "index"]);
@@ -54,6 +55,7 @@ Route::delete('issues/{id}', [IssueController::class, "destroy"]);
 // Route::get('task_images', [IssueController::class, "index"]);
 // Route::get('task_images/{id}', [IssueController::class, "show"]);
 Route::post('task_images', [TaskImageController::class, "store"]);
+Route::get('task_images/{fileName}', [TaskImageController::class, "showImage"]);
 // Route::patch('task_images/{id}', [IssueController::class, "update"]);
 // Route::delete('task_images/{id}', [IssueController::class, "destroy"]);
 
@@ -86,6 +88,7 @@ Route::delete('notifications/{id}', [NotificationController::class, "destroy"]);
 //TODO: Permissions
 
 Route::post('login', [AuthController::class, "login"]);
+Route::post('register', [AuthController::class, "register"]);
 
 Route::middleware('auth:api')->group(function () {
     Route::get('user_data', [UserController::class, "user_data"]);
