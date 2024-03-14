@@ -15,6 +15,10 @@ class Position extends Model
         'd_status',
     ];
 
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
     public function people()
     {
         return $this->hasMany(User::class);
