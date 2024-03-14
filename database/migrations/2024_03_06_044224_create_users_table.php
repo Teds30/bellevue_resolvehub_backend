@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->unsignedBigInteger('position_id')->nullable();
-            $table->unsignedBigInteger('department_id')->nullable();
             $table->string('phone_number')->nullable();
             $table->string('username')->unique();
             $table->string('password');
@@ -28,12 +27,6 @@ return new class extends Migration
             $table->foreign('position_id')
                 ->references('id')
                 ->on('positions')
-                ->onUpdate('cascade')
-                ->onDelete('set null');
-
-            $table->foreign('department_id')
-                ->references('id')
-                ->on('departments')
                 ->onUpdate('cascade')
                 ->onDelete('set null');
         });

@@ -30,7 +30,6 @@ class UserFactory extends Factory
             'first_name' => $fname,
             'last_name' => fake()->lastName(),
             'position_id' => Position::pluck('id')->random(),
-            'department_id' => Department::pluck('id')->random(),
             'username' => $fname,
             'password' => 'a',
             'remember_token' => Str::random(10),
