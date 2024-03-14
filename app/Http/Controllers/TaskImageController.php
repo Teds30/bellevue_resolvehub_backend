@@ -6,6 +6,8 @@ use App\Models\Task_Image;
 use App\Http\Requests\StoreTask_ImageRequest;
 use App\Http\Requests\UpdateTask_ImageRequest;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException as ExceptionFileNotFoundException;
+
 
 #TODO: Task Images Controller
 
@@ -73,6 +75,17 @@ class TaskImageController extends Controller
     {
         //
     }
+
+    public function showImage($fileName)
+    {
+        $pathToFile = storage_path("app/uploads/task_images/" . $fileName);
+        try {
+            return response()->file($pathToFile);
+        } catch (ExceptionFileNotFoundException $exception) {
+            return response()->json("File not found.", 404);
+        }
+    }
+
 
     /**
      * Show the form for editing the specified resource.
