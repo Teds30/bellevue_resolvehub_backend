@@ -25,7 +25,8 @@ return new class extends Migration
             $table->text('remarks')->nullable();
             $table->unsignedBigInteger('assignee_id')->nullable();
             $table->unsignedBigInteger('assignor_id')->nullable();
-            $table->tinyInteger('status')->default(0)->comment('0 -> requested | 1 -> pending | 2 -> on-going -> 3 -> cancelled');
+            $table->timestamp('assigned_timestamp')->nullable();
+            $table->tinyInteger('status')->default(0)->comment('0 -> requested | 1 -> active | 2 -> pending | 3 -> cancelled | 4 -> done');
             $table->tinyInteger('priority')->nullable();
             $table->timestamp('schedule')->nullable();
             $table->tinyInteger('d_status')->default(1);

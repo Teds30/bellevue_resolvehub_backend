@@ -23,6 +23,7 @@ class Task extends Model
         'remarks',
         'assignee_id',
         'assignor_id',
+        'assigned_timestamp',
         'status',
         'priority',
         'schedule',
