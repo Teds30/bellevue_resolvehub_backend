@@ -42,7 +42,6 @@ class UserController extends Controller
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'position_id' => 'integer',
-            'department_id' => 'integer',
             'phone_number' => 'string',
             'username' => 'required|string',
             'password' => 'required|string',
