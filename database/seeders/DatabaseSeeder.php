@@ -32,9 +32,11 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Housekeeping'],
         )->create();
 
-        Position::factory()->count(2)->sequence(
+        Position::factory()->count(4)->sequence(
             ['name' => 'Receptionist', "department_id" => 1],
             ['name' => 'Guest Relations Supervisor', "department_id" => 1],
+            ['name' => 'Software Engineer', "department_id" => 2],
+            ['name' => 'IT Officer', "department_id" => 2],
         )->create();
 
         Issue::factory()->count(2)->sequence(
