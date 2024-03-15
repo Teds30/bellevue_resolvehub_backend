@@ -93,4 +93,12 @@ Route::post('register', [AuthController::class, "register"]);
 Route::middleware('auth:api')->group(function () {
     Route::get('user_data', [UserController::class, "user_data"]);
 });
+
+//TODO: Move these to auth middleware
+
+Route::get('department_assigned_tasks/{id}', [DepartmentController::class, "department_assigned_tasks"]);
+Route::get('department_ongoing_tasks/{id}', [DepartmentController::class, "department_ongoing_tasks"]);
+Route::get('department_pending_tasks/{id}', [DepartmentController::class, "department_pending_tasks"]);
+
+
 // Route::post('register', [AuthController::class, "register"]);
