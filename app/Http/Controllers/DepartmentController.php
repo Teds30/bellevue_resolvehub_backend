@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Department;
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
+use App\Models\Position;
+use App\Models\Task;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DepartmentController extends Controller
@@ -69,19 +72,26 @@ class DepartmentController extends Controller
 
     public function department_employees($id)
     {
-        $res = User::get()->where('department_id', $id)->where('d_status', 1);
+        $positions = Position::get()->where('department_id', $id)->values();
+
+        // Extract the position IDs
+        $positionIds = $positions->pluck('id')->toArray();
+        $res = User::whereHas('position', function ($query) use ($positionIds) {
+            $query->whereIn('id', $positionIds);
+        })->get();
+
 
         if (!$res || !$res->count()) {
             return response()->json([
                 "data" => [],
                 "success" => false,
-                "message" => "Department not found."
+                "message" => "No employees found in this department."
             ], 404);
         }
 
         foreach ($res as $user) {
 
-            $user->position;
+            $user->position->department;
         }
 
         return [
@@ -140,6 +150,107 @@ class DepartmentController extends Controller
         return [
             "success" => true,
             "message" => "Successfully deleted."
+        ];
+    }
+
+
+
+    public function department_assigned_tasks($department_id)
+    {
+
+        $res2 = Task::get()
+            ->where('department_id', $department_id)
+            ->where('schedule', null)
+            ->where('assignee_id', null)
+            ->where('completed_marker_id', null)
+            ->values();
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No assigned tasks found for this department."
+            ], 404);
+        }
+
+
+        foreach ($res2 as $task) {
+            $task->requestor;
+        }
+
+
+        return [
+            "data" => $res2,
+            "success" => true,
+        ];
+    }
+
+
+    public function department_ongoing_tasks($department_id)
+    {
+
+        $res2 = Task::where('department_id', $department_id)
+            ->whereDate('schedule', Carbon::today())
+            ->where('completed_marker_id', null)
+            ->where('d_status', 1)
+            ->get()
+            ->values();
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No On-Going tasks found for this department."
+            ], 404);
+        }
+
+        foreach ($res2 as $task) {
+            $task->assignee;
+        }
+        foreach ($res2 as $task) {
+            $task->requestor;
+        }
+
+        return [
+            "data" => $res2,
+            "success" => true,
+        ];
+    }
+
+
+    public function department_pending_tasks($department_id)
+    {
+
+        $res2 = Task::where('department_id', $department_id)
+            ->whereDate('schedule', '>', Carbon::today())
+            ->where('completed_marker_id', null)
+            ->where('d_status', 1)
+            ->get()
+            ->values();
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No pending tasks found for this department."
+            ], 404);
+        }
+
+
+
+        foreach ($res2 as $task) {
+            $task->assignee;
+        }
+        foreach ($res2 as $task) {
+            $task->requestor;
+        }
+
+        return [
+            "data" => $res2,
+            "success" => true,
         ];
     }
 }
