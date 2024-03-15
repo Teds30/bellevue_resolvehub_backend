@@ -85,17 +85,17 @@ class TaskController extends Controller
 
         $res->issue;
         $res->department;
-        $res->requestor->department;
+        $res->requestor->position->department;
         $res->assignee;
         $res->assignor;
         $res->pending_marker;
         $res->completed_marker;
         $res->task_images;
 
-        if ($res->assignee) $res->assignee->department;
-        if ($res->assignor) $res->assignor->department;
-        if ($res->pending_marker) $res->pending_marker->department;
-        if ($res->completed_marker) $res->completed_marker->department;
+        if ($res->assignee) $res->assignee->position->department;
+        if ($res->assignor) $res->assignor->position->department;
+        if ($res->pending_marker) $res->pending_marker->position->department;
+        if ($res->completed_marker) $res->completed_marker->position->department;
 
 
         return [
