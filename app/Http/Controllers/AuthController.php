@@ -28,10 +28,9 @@ class AuthController extends Controller
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'position_id' => 'required|integer',
-            'department_id' => 'required|integer',
             'phone_number' => 'required|string',
             'username' => 'required|string',
-            'password' => 'required|string|confirmed',
+            'password' => 'required|string',
         ]);
 
 
@@ -39,7 +38,6 @@ class AuthController extends Controller
             'first_name' => $fields['first_name'],
             'last_name' => $fields['last_name'],
             'position_id' => $fields['position_id'],
-            'department_id' => $fields['department_id'],
             'phone_number' => $fields['phone_number'],
             'username' => $fields['username'],
             'password' => $fields['password'],
