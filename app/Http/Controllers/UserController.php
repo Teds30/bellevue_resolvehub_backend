@@ -41,8 +41,8 @@ class UserController extends Controller
         $request->validate([
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'position_id' => 'integer',
-            'phone_number' => 'string',
+            'position_id' => 'required|integer',
+            'phone_number' => 'nullable|string',
             'username' => 'required|string',
             'password' => 'required|string',
         ]);
@@ -77,6 +77,7 @@ class UserController extends Controller
     {
         // return $request;
         $user = $request->user();
+        $user->position;
 
         if (!$user) {
             return response()->json(['data' => [], 'success' => false, 'message' => 'Unauthorized'], 401);
@@ -132,15 +133,25 @@ class UserController extends Controller
 
         $res = User::get()->where('id', $user_id)->first();
 
-        $department = $res->department;
+        $department = $res->position->department;
 
 
-        $res2 = Task::get()
-            ->where('department_id', $department->id)
-            ->where('schedule', null)
+        //TODO: FILTERED BY PRIORITY & NEAREST SCHEDULE
+        $res2 = Task::where('department_id', $department->id)
             ->where('d_status', 1)
-            ->where('assignee_id', null)
+            ->where('status', 0)
+            ->where('schedule', null)
+            ->where(function ($query) use ($user_id) {
+                $query->where('requestor_id', $user_id);
+            })
+            ->get()
             ->values();
+
+
+
+        foreach ($res2 as $task) {
+            $task->requestor;
+        }
 
 
         if (!$res2 || !$res2->count()) {
@@ -181,6 +192,11 @@ class UserController extends Controller
             ], 404);
         }
 
+
+        foreach ($res2 as $task) {
+            $task->requestor;
+        }
+
         return [
             "data" => $res2,
             "success" => true,
@@ -210,6 +226,11 @@ class UserController extends Controller
                 "success" => false,
                 "message" => "No pending tasks found."
             ], 404);
+        }
+
+
+        foreach ($res2 as $task) {
+            $task->requestor;
         }
 
         return [
