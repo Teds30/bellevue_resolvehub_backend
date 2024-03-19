@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -27,7 +28,7 @@ return new class extends Migration
             $table->unsignedBigInteger('completed_marker_id')->nullable();
             $table->text('pending_reason')->nullable();
             $table->text('remarks')->nullable();
-            $table->tinyInteger('status')->default(0)->comment('0 -> requested | 1 -> pending | 2 -> on-going -> 3 -> cancelled');
+            $table->tinyInteger('status')->default(0)->comment('0 -> requested | 1 -> pending | 2 -> on-going | 3 -> cancelled');
             $table->tinyInteger('d_status')->default(1);
 
             $table->timestamps();
@@ -38,6 +39,7 @@ return new class extends Migration
             $table->foreign('pending_marker_id')->references('id')->on('users')->onDelete('no action');
             $table->foreign('completed_marker_id')->references('id')->on('users')->onDelete('no action');
         });
+
     }
 
     /**
