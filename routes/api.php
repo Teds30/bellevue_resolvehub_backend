@@ -66,6 +66,7 @@ Route::delete('users/{id}', [UserController::class, "destroy"]);
 Route::get('user_assigned_tasks/{id}', [UserController::class, "user_assigned_tasks"]);
 Route::get('user_ongoing_tasks/{id}', [UserController::class, "user_ongoing_tasks"]);
 Route::get('user_pending_tasks/{id}', [UserController::class, "user_pending_tasks"]);
+Route::get('user_assigned_projects/{id}', [UserController::class, "user_assigned_projects"]);
 
 Route::get('tasks', [TaskController::class, "index"]);
 Route::get('tasks/{id}', [TaskController::class, "show"]);
@@ -78,6 +79,9 @@ Route::get('projects/{id}', [ProjectController::class, "show"]);
 Route::post('projects', [ProjectController::class, "store"]);
 Route::patch('projects/{id}', [ProjectController::class, "update"]);
 Route::delete('projects/{id}', [ProjectController::class, "destroy"]);
+Route::get('department_projects/{id}', [ProjectController::class, "department_projects"]);
+Route::get('user_projects/{id}', [ProjectController::class, "user_projects"]);
+Route::get('assigned_projects/{id}', [ProjectController::class, "assigned_projects"]);
 
 Route::get('notifications', [NotificationController::class, "index"]);
 Route::get('notifications/{id}', [NotificationController::class, "show"]);

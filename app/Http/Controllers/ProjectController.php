@@ -48,8 +48,8 @@ class ProjectController extends Controller
             'details' => 'nullable|string',
             'location' => 'nullable|string',
             'coordinates' => 'nullable|string',
-            'schedule' => 'nullable|date_format:Y-m-d H:i',
-            'deadline' => 'nullable|date_format:Y-m-d H:i',
+            'schedule' => 'nullable|date',
+            'deadline' => 'nullable|date',
             'type' => 'required|integer',
             'requestor_id' => 'required|integer',
             'department_id' => 'required|integer',
@@ -64,6 +64,60 @@ class ProjectController extends Controller
 
         $res = Project::create($request->all());
         return  response()->json($res, 201);
+    }
+
+
+    public function department_projects($id)
+    {
+        $res = Project::get()->where('department_id', $id)->where('d_status', 1);
+
+        if (!$res || !$res->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No projects yet."
+            ], 404);
+        }
+
+        return [
+            "data" => $res,
+            "success" => true,
+        ];
+    }
+
+    public function user_projects($id)
+    {
+        $res = Project::get()->where('requestor_id', $id)->where('d_status', 1)->values();
+
+        if (!$res || !$res->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No projects yet."
+            ], 404);
+        }
+
+        return [
+            "data" => $res,
+            "success" => true,
+        ];
+    }
+    public function assigned_projects($id)
+    {
+        $res = Project::get()->where('incharge_id', $id)->where('d_status', 1)->values();
+
+        if (!$res || !$res->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No projects yet."
+            ], 404);
+        }
+
+        return [
+            "data" => $res,
+            "success" => true,
+        ];
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Amenity;
+use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
@@ -236,6 +237,30 @@ class UserController extends Controller
         return [
             "data" => $res2,
             "success" => true,
+        ];
+    }
+
+    public function user_assigned_projects($user_id)
+    {
+
+
+        $res2 = User::get()->where('id', $user_id)->first();
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No projects found."
+            ]);
+        }
+
+        $projects = $res2->projects;
+
+        return [
+            "data" => $projects,
+            "success" => true,
+            "message" => null
         ];
     }
 }
