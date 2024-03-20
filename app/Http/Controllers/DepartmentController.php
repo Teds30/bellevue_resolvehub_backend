@@ -28,6 +28,17 @@ class DepartmentController extends Controller
             ], 404);
         }
 
+        foreach ($res as $department) {
+            // Count employees for the current department
+            $employeeCount = User::whereHas('position', function ($query) use ($department) {
+                $query->where('department_id', $department->id); // Corrected column name
+            })->where('d_status', 1)->count();
+
+            // Append employee count to the department object
+            $department->employee_count = $employeeCount;
+        }
+
+
         return [
             "data" => $res,
             "success" => true,
@@ -78,7 +89,7 @@ class DepartmentController extends Controller
         $positionIds = $positions->pluck('id')->toArray();
         $res = User::whereHas('position', function ($query) use ($positionIds) {
             $query->whereIn('id', $positionIds);
-        })->get();
+        })->where('d_status', 1)->get();
 
 
         if (!$res || !$res->count()) {
@@ -92,6 +103,31 @@ class DepartmentController extends Controller
         foreach ($res as $user) {
 
             $user->position->department;
+        }
+
+        return [
+            "data" => $res,
+            "success" => true,
+        ];
+    }
+
+
+    public function department_positions($id)
+    {
+        $res = Position::get()->where('department_id', $id)->values();
+
+
+        if (!$res || !$res->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No positions found in this department."
+            ]);
+        }
+
+        foreach ($res as $user) {
+
+            $user->position;
         }
 
         return [
@@ -177,6 +213,7 @@ class DepartmentController extends Controller
 
         foreach ($res2 as $task) {
             $task->requestor;
+            $task->issue;
         }
 
 
@@ -208,9 +245,8 @@ class DepartmentController extends Controller
 
         foreach ($res2 as $task) {
             $task->assignee;
-        }
-        foreach ($res2 as $task) {
             $task->requestor;
+            $task->issue;
         }
 
         return [
@@ -239,13 +275,10 @@ class DepartmentController extends Controller
             ], 404);
         }
 
-
-
-        foreach ($res2 as $task) {
-            $task->assignee;
-        }
         foreach ($res2 as $task) {
             $task->requestor;
+            $task->assignee;
+            $task->issue;
         }
 
         return [
