@@ -43,6 +43,7 @@ Route::post('departments', [DepartmentController::class, "store"]);
 Route::patch('departments/{id}', [DepartmentController::class, "update"]);
 Route::delete('departments/{id}', [DepartmentController::class, "destroy"]);
 Route::get('department_employees/{id}', [DepartmentController::class, "department_employees"]);
+Route::get('department_positions/{id}', [DepartmentController::class, "department_positions"]);
 
 
 Route::get('issues', [IssueController::class, "index"]);
