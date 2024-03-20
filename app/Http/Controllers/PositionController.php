@@ -45,6 +45,7 @@ class PositionController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
+            'department_id' => 'required|integer',
         ]);
         $res = Position::create($request->all());
         return  response()->json($res, 201);
