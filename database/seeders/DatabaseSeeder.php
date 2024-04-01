@@ -32,21 +32,19 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Housekeeping'],
         )->create();
 
-        Position::factory()->count(4)->sequence(
+        Position::factory()->count(7)->sequence(
+            ['name' => 'Department Head', "department_id" => 2],
+            ['name' => 'MIS Manager', "department_id" => 2],
+            ['name' => 'Supervisor', "department_id" => 2],
+            ['name' => 'IT Officer', "department_id" => 2],
+            ['name' => 'Software Engineer', "department_id" => 2],
             ['name' => 'Receptionist', "department_id" => 1],
             ['name' => 'Guest Relations Supervisor', "department_id" => 1],
-            ['name' => 'Software Engineer', "department_id" => 2],
-            ['name' => 'IT Officer', "department_id" => 2],
         )->create();
 
         Issue::factory()->count(2)->sequence(
             ['name' => 'Network: No internet'],
             ['name' => 'Network: Slow internet'],
-        )->create();
-
-        Permission::factory()->count(2)->sequence(
-            ['position_id' => 1, 'access_name' => 'metrics'],
-            ['position_id' => 2, 'access_name' => 'can_createissue'],
         )->create();
 
         User::factory()->count(1)->create();

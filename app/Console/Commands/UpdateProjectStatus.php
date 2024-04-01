@@ -35,6 +35,7 @@ class UpdateProjectStatus extends Command
         // Update projects status based on conditions
         $onGoing = Project::where('schedule', '<=', $today)
             ->where('deadline', '>=', $today)
+            ->where('status', '!=', 0)
             ->update(['status' => 2]);
 
         // $pending = Project::where(function ($query) use ($today) {
@@ -42,11 +43,13 @@ class UpdateProjectStatus extends Command
         //         ->orWhere('deadline', '<', $today);
         // })->update(['status' => 1]);
         $pending = Project::where('schedule', '>', $today)
+            ->where('status', '!=', 0)
             ->update(['status' => 1]);
 
 
 
         $done = Project::where('deadline', '<', $today)
+            ->where('status', '!=', 0)
             ->update(['status' => 4]);
 
         $this->info('Project statuses updated successfully.');

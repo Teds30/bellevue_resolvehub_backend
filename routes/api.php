@@ -11,6 +11,7 @@ use App\Http\Controllers\TaskImageController;
 use App\Http\Controllers\UserController;
 use App\Models\Department;
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\Task_Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -89,6 +90,13 @@ Route::get('notifications/{id}', [NotificationController::class, "show"]);
 Route::post('notifications', [NotificationController::class, "store"]);
 Route::patch('notifications/{id}', [NotificationController::class, "update"]);
 Route::delete('notifications/{id}', [NotificationController::class, "destroy"]);
+
+
+Route::get('issues_metric/week', [TaskController::class, "issues_metric_week"]);
+Route::get('issues_metric/month', [TaskController::class, "issues_metric_month"]);
+
+Route::get('issues_most_reported', [TaskController::class, "issues_most_reported"]);
+Route::get('tasks_metric/{department_id}', [TaskController::class, "tasks_metric"]);
 
 //TODO: Permissions
 

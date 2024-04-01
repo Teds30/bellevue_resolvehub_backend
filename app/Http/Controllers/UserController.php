@@ -8,6 +8,7 @@ use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 use Twilio\Rest\Client;
@@ -80,6 +81,15 @@ class UserController extends Controller
         $user = $request->user();
         $user->position;
 
+        $permissions = [];
+
+        foreach ($user->position->permissions as $perm) {
+            $permissions[] = $perm->access_code;
+        }
+
+        unset($user->position->permissions);
+        $user['permissions'] = $permissions;
+
         if (!$user) {
             return response()->json(['data' => [], 'success' => false, 'message' => 'Unauthorized'], 401);
         }
@@ -101,6 +111,11 @@ class UserController extends Controller
         }
 
         $res->update($request->all());
+
+        if ($request->password) {
+
+            $res->update(['password' => Hash::make($request->password)]);
+        }
 
         return [
             "data" => $res,
@@ -151,7 +166,16 @@ class UserController extends Controller
 
 
         foreach ($res2 as $task) {
+            $task->issue;
             $task->requestor;
+
+
+
+
+
+
+
+            
         }
 
 
@@ -196,6 +220,7 @@ class UserController extends Controller
 
         foreach ($res2 as $task) {
             $task->requestor;
+            $task->issue;
         }
 
         return [
@@ -231,6 +256,7 @@ class UserController extends Controller
 
 
         foreach ($res2 as $task) {
+            $task->issue;
             $task->requestor;
         }
 

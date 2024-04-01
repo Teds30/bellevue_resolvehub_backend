@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Models\Issue;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TaskController extends Controller
 {
@@ -155,5 +158,142 @@ class TaskController extends Controller
             "success" => true,
             "message" => "Successfully deleted."
         ];
+    }
+
+
+    public function issues_metric_week()
+    {
+
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        $issuesBySchedule = Task::whereBetween('schedule', [$startDate, $endDate])
+            ->select(DB::raw('DATE(schedule) as day'), DB::raw('count(*) as total'))
+            ->groupBy(DB::raw('DATE(schedule)'))
+            ->get();
+
+
+        $formattedData = [];
+        $daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+        // Initialize formatted data with counts set to 0 for each day of the week
+        foreach ($daysOfWeek as $day) {
+            $formattedData[$day] = 0;
+        }
+
+
+        // return $issuesBySchedule[0];
+        // return date('l', strtotime($issuesBySchedule[0]->schedule);
+        // Update formatted data with actual counts from the retrieved data
+        foreach ($issuesBySchedule as $issue) {
+            $scheduleDay = date('D', strtotime($issue->day)); // Extract day name from datetime
+            $formattedData[$scheduleDay] += $issue->total;
+        }
+
+
+
+        // Prepare the data in the format expected by the chart library
+        $chartData = [
+            'xAxis' => [['data' => $daysOfWeek]],
+            'series' => [
+                [
+                    'data' => array_values($formattedData),
+                    'area' => true,
+                ],
+            ],
+        ];
+
+        return $chartData;
+    }
+
+    public function issues_metric_month()
+    {
+        // Calculate the start and end date for the current month
+        $startDate = now()->startOfMonth()->toDateString(); // Start of the current month
+        $endDate = now()->endOfMonth()->toDateString(); // End of the current month
+
+        // Retrieve data for the current month
+        $issuesBySchedule = Task::whereBetween('schedule', [$startDate, $endDate])
+            ->select(DB::raw('DATE(schedule) as day'), DB::raw('count(*) as total'))
+            ->groupBy(DB::raw('DATE(schedule)'))
+            ->get();
+
+        $formattedData = [];
+        $daysOfMonth = [];
+
+        // Generate an array of days in the current month
+        $currentDate = now()->startOfMonth();
+        while ($currentDate <= now()->endOfMonth()) {
+            $daysOfMonth[] = $currentDate->format('l');
+            $currentDate->addDay();
+        }
+
+        // Initialize formatted data with counts set to 0 for each day of the month
+        foreach ($daysOfMonth as $day) {
+            $formattedData[$day] = 0;
+        }
+
+        // Update formatted data with actual counts from the retrieved data
+        foreach ($issuesBySchedule as $issue) {
+            $scheduleDay = date('l', strtotime($issue->day)); // Extract day name from datetime
+            $formattedData[$scheduleDay] += $issue->total;
+        }
+
+        // Prepare the data in the format expected by the chart library
+        $chartData = [
+            'xAxis' => [['data' => $daysOfMonth]],
+            'series' => [
+                [
+                    'data' => array_values($formattedData),
+                    'area' => true,
+                ],
+            ],
+        ];
+
+        return $chartData;
+    }
+
+
+    public function issues_most_reported(Request $request)
+    {
+
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        $mostReportedIssues = Task::whereBetween('schedule', [$startDate, $endDate])
+            ->select('issue_id', DB::raw('count(*) as total'))
+            ->groupBy('issue_id')
+            ->orderByDesc('total')
+            ->limit(5) // You can adjust this limit as needed
+            ->get();
+
+        foreach ($mostReportedIssues as $issue) {
+            $issue->issue;
+        }
+
+        return $mostReportedIssues;
+    }
+
+    public function tasks_metric($department_id)
+    {
+
+        $unassigned = Task::where('assignee_id', null)->where('status', 0)->where('department_id', $department_id)->count();
+        $pending = Task::where('department_id', $department_id)
+            ->whereDate('schedule', '>', Carbon::today())
+            ->where('completed_marker_id', null)
+            ->where('d_status', 1)->count();
+        $onGoing = Task::whereDate('schedule', Carbon::today())
+            ->where('department_id', $department_id)
+            ->where('d_status', 1)
+            ->where('status', '!=', 3)
+            ->count();
+
+        $cancelled = Task::where('status', 3)->where('department_id', $department_id)->count();
+
+        $total = Task::where('d_status', 1)->where('department_id', $department_id)->count();
+
+        return ["unassigned" => $unassigned, "pending" => $pending, "ongoing" => $onGoing, "cancelled" => $cancelled, "total" => $total];
     }
 }

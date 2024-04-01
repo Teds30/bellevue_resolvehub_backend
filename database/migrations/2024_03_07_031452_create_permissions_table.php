@@ -13,15 +13,17 @@ return new class extends Migration
     {
         Schema::create('permissions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("position_id");
-            $table->string("access_name");
-            $table->boolean("has_access")->default(false);
+            $table->unsignedBigInteger('position_id')->nullable();
+            $table->string("access_code");
             $table->tinyInteger("d_status")->default(1);
 
             $table->timestamps();
 
-
-            $table->foreign('position_id')->references('id')->on('positions');
+            $table->foreign('position_id')
+                ->references('id')
+                ->on('positions')
+                ->onUpdate('cascade')
+                ->onDelete('set null');
         });
     }
 
