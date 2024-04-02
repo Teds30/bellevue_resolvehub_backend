@@ -30,6 +30,25 @@ class NotificationController extends Controller
         ];
     }
 
+
+    public function user_notifications($id)
+    {
+        $res = Notification::get()->where('receiver_id', $id)->values();
+
+        if (!$res || !$res->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No notifications yet."
+            ], 404);
+        }
+
+        return [
+            "data" => $res,
+            "success" => true,
+        ];
+    }
+
     /**
      * Show the form for creating a new resource.
      */
