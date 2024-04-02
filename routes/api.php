@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PositionController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskImageController;
 use App\Http\Controllers\UserController;
 use App\Models\Department;
+use App\Models\DeviceToken;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\Task_Image;
@@ -87,10 +89,12 @@ Route::get('assigned_projects/{id}', [ProjectController::class, "assigned_projec
 
 Route::get('notifications', [NotificationController::class, "index"]);
 Route::get('notifications/{id}', [NotificationController::class, "show"]);
+Route::get('user_notifications/{id}', [NotificationController::class, "user_notifications"]);
 Route::post('notifications', [NotificationController::class, "store"]);
 Route::patch('notifications/{id}', [NotificationController::class, "update"]);
 Route::delete('notifications/{id}', [NotificationController::class, "destroy"]);
 
+Route::post('device_tokens', [DeviceTokenController::class, "store"]);
 
 Route::get('issues_metric/week', [TaskController::class, "issues_metric_week"]);
 Route::get('issues_metric/month', [TaskController::class, "issues_metric_month"]);
