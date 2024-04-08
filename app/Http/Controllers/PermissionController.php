@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Permission;
 use App\Http\Requests\StorePermissionRequest;
 use App\Http\Requests\UpdatePermissionRequest;
+use Illuminate\Http\Request;
 
 class PermissionController extends Controller
 {
@@ -62,5 +63,11 @@ class PermissionController extends Controller
     public function destroy(Permission $permission)
     {
         //
+    }
+
+    public function change_permissions($position_id, Request $request)
+    {
+
+        return $request->all();
     }
 }

@@ -38,6 +38,8 @@ Route::get('positions/{id}', [PositionController::class, "show"]);
 Route::post('positions', [PositionController::class, "store"]);
 Route::patch('positions/{id}', [PositionController::class, "update"]);
 Route::delete('positions/{id}', [PositionController::class, "destroy"]);
+Route::get('position_permissions/{id}', [PositionController::class, "permissions"]);
+Route::patch('update_permissions/{id}', [PositionController::class, "update_permissions"]);
 
 
 Route::get('departments', [DepartmentController::class, "index"]);
@@ -95,6 +97,7 @@ Route::patch('notifications/{id}', [NotificationController::class, "update"]);
 Route::delete('notifications/{id}', [NotificationController::class, "destroy"]);
 
 Route::post('device_tokens', [DeviceTokenController::class, "store"]);
+Route::delete('device_tokens', [DeviceTokenController::class, "destroy"]);
 
 Route::get('issues_metric/week', [TaskController::class, "issues_metric_week"]);
 Route::get('issues_metric/month', [TaskController::class, "issues_metric_month"]);

@@ -169,12 +169,6 @@ class UserController extends Controller
             $task->issue;
             $task->requestor;
 
-
-
-
-
-
-
             
         }
 

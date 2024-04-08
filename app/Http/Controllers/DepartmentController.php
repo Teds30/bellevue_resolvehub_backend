@@ -117,6 +117,7 @@ class DepartmentController extends Controller
         $res = Position::get()->where('department_id', $id)->values();
 
 
+
         if (!$res || !$res->count()) {
             return response()->json([
                 "data" => [],

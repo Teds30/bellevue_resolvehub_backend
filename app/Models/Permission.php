@@ -12,12 +12,11 @@ class Permission extends Model
 
     protected $fillable = [
         'position_id',
-        'access_name',
-        'has_access',
+        'access_code',
         'd_status',
     ];
 
-    
+
     public function position()
     {
         return $this->belongsTo(Position::class, 'position_id');

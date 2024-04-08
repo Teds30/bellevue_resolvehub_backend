@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Position;
 use App\Http\Requests\StorePositionRequest;
 use App\Http\Requests\UpdatePositionRequest;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 
 class PositionController extends Controller
@@ -125,5 +126,62 @@ class PositionController extends Controller
             "success" => true,
             "message" => "Successfully deleted."
         ];
+    }
+
+    public function permissions($id)
+    {
+
+        $res = Position::get()->where('id', $id)->first();
+
+        if (!$res || !$res->count()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Position not found."
+            ], 404);
+        }
+
+        $permissions = $res->permissions->pluck('access_code')->toArray();
+
+        unset($res['permissions']);
+
+        $res['permissions'] = $permissions;
+
+
+        return [
+            "data" => $res,
+            "success" => true,
+        ];
+    }
+
+    public function update_permissions($id, Request $request)
+    {
+
+        $codes = $request['codes'];
+        $position = Position::find($id);
+
+        if (!$position) {
+            return response()->json([
+                "success" => false,
+                "message" => "Position not found."
+            ], 404);
+        }
+
+        // Delete existing permissions for the position
+        $position->permissions()->delete();
+
+        // Create new permissions with the provided codes
+        $permissions = [];
+        foreach ($codes as $code) {
+            $permissions[] = new Permission([
+                'position_id' => $id,
+                'access_code' => $code
+            ]);
+        }
+        $position->permissions()->saveMany($permissions);
+
+        return response()->json([
+            "data" => $position->permissions,
+            "success" => true,
+        ]);
     }
 }
