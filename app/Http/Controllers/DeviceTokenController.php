@@ -85,8 +85,22 @@ class DeviceTokenController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DeviceToken $deviceToken)
+    public function destroy(Request $request)
     {
-        //
+        $res = DeviceToken::get()->where('token', $request->token)->first();
+
+        if (!$res || !$res->count()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Token not found."
+            ], 404);
+        }
+
+        $res->delete();
+
+        return [
+            "success" => true,
+            "message" => "Successfully deleted."
+        ];
     }
 }

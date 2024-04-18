@@ -12,7 +12,7 @@ class Task extends Model
 
     protected $fillable = [
         'room',
-        'issue_id',
+        'issue',
         'details',
         'requestor_id',
         'department_id',
@@ -30,10 +30,10 @@ class Task extends Model
         'd_status',
     ];
 
-    public function issue()
-    {
-        return $this->belongsTo(Issue::class, 'issue_id');
-    }
+    // public function issue()
+    // {
+    //     return $this->belongsTo(Issue::class, 'issue_id');
+    // }
     public function requestor()
     {
         return $this->belongsTo(User::class, 'requestor_id');

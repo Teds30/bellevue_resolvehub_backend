@@ -6,6 +6,7 @@ use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\ProjectCommentController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskImageController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\UserController;
 use App\Models\Department;
 use App\Models\DeviceToken;
 use App\Models\Project;
+use App\Models\ProjectComment;
 use App\Models\Task;
 use App\Models\Task_Image;
 use Illuminate\Http\Request;
@@ -71,10 +73,14 @@ Route::patch('users/{id}', [UserController::class, "update"]);
 Route::delete('users/{id}', [UserController::class, "destroy"]);
 Route::get('user_assigned_tasks/{id}', [UserController::class, "user_assigned_tasks"]);
 Route::get('user_ongoing_tasks/{id}', [UserController::class, "user_ongoing_tasks"]);
+Route::get('user_done_tasks/{id}', [UserController::class, "user_done_tasks"]);
 Route::get('user_pending_tasks/{id}', [UserController::class, "user_pending_tasks"]);
 Route::get('user_assigned_projects/{id}', [UserController::class, "user_assigned_projects"]);
+Route::get('projects_page', [ProjectController::class, "paginate"]);
+
 
 Route::get('tasks', [TaskController::class, "index"]);
+Route::get('tasks_page', [TaskController::class, "paginate"]);
 Route::get('tasks/{id}', [TaskController::class, "show"]);
 Route::post('tasks', [TaskController::class, "store"]);
 Route::patch('tasks/{id}', [TaskController::class, "update"]);
@@ -88,6 +94,8 @@ Route::delete('projects/{id}', [ProjectController::class, "destroy"]);
 Route::get('department_projects/{id}', [ProjectController::class, "department_projects"]);
 Route::get('user_projects/{id}', [ProjectController::class, "user_projects"]);
 Route::get('assigned_projects/{id}', [ProjectController::class, "assigned_projects"]);
+Route::get('project-comments/{project_id}', [ProjectCommentController::class, "comments"]);
+Route::post('project-comments', [ProjectCommentController::class, "store"]);
 
 Route::get('notifications', [NotificationController::class, "index"]);
 Route::get('notifications/{id}', [NotificationController::class, "show"]);
@@ -119,6 +127,7 @@ Route::middleware('auth:api')->group(function () {
 Route::get('department_assigned_tasks/{id}', [DepartmentController::class, "department_assigned_tasks"]);
 Route::get('department_ongoing_tasks/{id}', [DepartmentController::class, "department_ongoing_tasks"]);
 Route::get('department_pending_tasks/{id}', [DepartmentController::class, "department_pending_tasks"]);
+Route::get('department_done_tasks/{id}', [DepartmentController::class, "department_done_tasks"]);
 
 
 // Route::post('register', [AuthController::class, "register"]);

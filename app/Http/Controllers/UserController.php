@@ -79,7 +79,7 @@ class UserController extends Controller
     {
         // return $request;
         $user = $request->user();
-        $user->position;
+        $user->position->department;
 
         $permissions = [];
 
@@ -168,8 +168,6 @@ class UserController extends Controller
         foreach ($res2 as $task) {
             $task->issue;
             $task->requestor;
-
-            
         }
 
 
@@ -281,6 +279,44 @@ class UserController extends Controller
             "data" => $projects,
             "success" => true,
             "message" => null
+        ];
+    }
+    public function user_done_tasks($user_id, $today = false)
+    {
+
+        $tmp = Task::where('assignee_id', $user_id)
+            // ->whereDate('schedule', '>', Carbon::today())
+            ->where('completed_marker_id', '!=', null)
+            ->where('d_status', 1);
+
+
+        if ($today) {
+
+            $tmp = $tmp->whereDate('updated_at', Carbon::today());
+        }
+
+        $res2 = $tmp->get()
+            ->values();
+
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No accomplished tasks found."
+            ], 404);
+        }
+
+
+        foreach ($res2 as $task) {
+            $task->issue;
+            $task->requestor;
+        }
+
+        return [
+            "data" => $res2,
+            "success" => true,
         ];
     }
 }

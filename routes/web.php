@@ -24,4 +24,4 @@ Route::get('test', function () {
     return "Event has been sent!";
 });
 
-Route::get('/send-notification', [PushNotificationController::class, 'sendPushNotification']);
+Route::get('/send-notification', [PushNotificationController::class, 'newTask']);

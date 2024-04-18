@@ -31,7 +31,7 @@ class DepartmentController extends Controller
         foreach ($res as $department) {
             // Count employees for the current department
             $employeeCount = User::whereHas('position', function ($query) use ($department) {
-                $query->where('department_id', $department->id); // Corrected column name
+                $query->where('department_id', $department->id);
             })->where('d_status', 1)->count();
 
             // Append employee count to the department object
@@ -73,6 +73,15 @@ class DepartmentController extends Controller
         }
 
         $res->positions;
+
+
+        // Count employees for the current department
+        $employeeCount = User::whereHas('position', function ($query) use ($res) {
+            $query->where('department_id', $res->id);
+        })->where('d_status', 1)->count();
+
+        // Append employee count to the department object
+        $res->employee_count = $employeeCount;
 
         return [
             "data" => $res,
@@ -214,7 +223,7 @@ class DepartmentController extends Controller
 
         foreach ($res2 as $task) {
             $task->requestor;
-            $task->issue;
+            // $task->issue;
         }
 
 
@@ -247,7 +256,7 @@ class DepartmentController extends Controller
         foreach ($res2 as $task) {
             $task->assignee;
             $task->requestor;
-            $task->issue;
+            // $task->issue;
         }
 
         return [
@@ -279,7 +288,45 @@ class DepartmentController extends Controller
         foreach ($res2 as $task) {
             $task->requestor;
             $task->assignee;
-            $task->issue;
+            // $task->issue;
+        }
+
+        return [
+            "data" => $res2,
+            "success" => true,
+        ];
+    }
+
+    public function department_done_tasks($department_id, Request $request)
+    {
+
+        $today = $request->today ?? false;
+
+        $tmp = Task::where('department_id', $department_id)
+            // ->whereDate('schedule', '>', Carbon::today())
+            ->where('completed_marker_id', '!=', null)
+            ->where('d_status', 1);
+
+        if ($today) {
+            $tmp = $tmp->whereDate('updated_at', '=', Carbon::today());
+        }
+
+        $res2 = $tmp->get()
+            ->values();
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No accomplished tasks found for this department."
+            ], 404);
+        }
+
+        foreach ($res2 as $task) {
+            $task->requestor;
+            $task->assignee;
+            // $task->issue;
         }
 
         return [

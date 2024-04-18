@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
             $table->string('room');
-            $table->unsignedBigInteger('issue_id');
+            $table->string('issue');
             $table->text('details')->nullable();
             $table->unsignedBigInteger('requestor_id');
             $table->unsignedBigInteger('department_id');
@@ -33,7 +33,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->foreign('issue_id')->references('id')->on('issues');
+            // $table->foreign('issue_id')->references('id')->on('issues');
             $table->foreign('requestor_id')->references('id')->on('users')->onDelete('no action');
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('no action');
             $table->foreign('pending_marker_id')->references('id')->on('users')->onDelete('set null');

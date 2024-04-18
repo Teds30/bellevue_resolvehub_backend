@@ -50,4 +50,8 @@ class Project extends Model
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
+    public function comments()
+    {
+        return $this->hasMany(ProjectComment::class);
+    }
 }

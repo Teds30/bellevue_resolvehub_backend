@@ -6,12 +6,25 @@ use App\Models\Task;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Issue;
+use App\Models\Notification;
+use App\Models\Position;
+use App\Models\User;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TaskController extends Controller
 {
+
+
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -35,6 +48,74 @@ class TaskController extends Controller
         ];
     }
 
+    public function paginate(Request $request)
+    {
+
+        // return $request->input('page_size');
+        // Retrieve page size and page number from the request, with default values if not provided
+        $pageSize = $request->input('page_size', 10); // Default page size is 10
+        $page = $request->input('page', 0); // Default page is 1
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
+
+
+
+        // $tasks = Task::where('d_status', 1)->with('issue')->with('department')->with('assignee')->with('requestor')->with('assignor');
+        $tasks = Task::where('d_status', 1)->with('department')->with('assignee')->with('requestor')->with('assignor');
+
+        if ($filterBy == 'today') {
+            $tasks = $tasks->whereDate('created_at', Carbon::today());
+        }
+        if ($filterBy == 'this_week') {
+
+            $startOfWeek = Carbon::now()->startOfWeek(); // Start of the week (Monday)
+            $endOfWeek = Carbon::now()->endOfWeek(); // End of the week (Sunday)
+            $tasks = $tasks->whereDate('created_at', [$startOfWeek, $endOfWeek]);
+        }
+        if ($filterBy == 'month' && $month && $year) {
+
+
+            $tasks = $tasks->whereMonth('created_at', Carbon::parse($month))
+                ->whereYear('created_at', $year);
+        }
+        if ($filterBy == 'year' && $year) {
+            $tasks = $tasks->whereYear('created_at', $year);
+        }
+        if ($filterBy == 'custom' && $custom) {
+            $tasks = $tasks->whereDate('created_at', Carbon::parse($custom)->format('Y-m-d'));
+        }
+
+        $tasks = $tasks
+            ->orderBy('created_at', 'desc')
+            ->paginate($pageSize, ['*'], 'page', $page);
+
+
+        // Check if any tasks are found
+        if (!$tasks || !$tasks->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No tasks found."
+            ], 404);
+        }
+
+
+        foreach ($tasks as $task) {
+            //removed $task->issue->name;
+            $task['row_data'] = ['id' => $task->id, 'name' => $task->issue, 'created_at' => $task->created_at];
+        }
+
+
+        // Return paginated tasks
+        return response()->json([
+            "data" => $tasks,
+            "success" => true,
+            "message" => "Tasks fetched successfully."
+        ], 200);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -50,7 +131,7 @@ class TaskController extends Controller
     {
         $request->validate([
             'room' => 'required|string|max:255',
-            'issue_id' => 'required|integer',
+            'issue' => 'required|string|max:80',
             'details' => 'nullable|string',
             'requestor_id' => 'required|integer',
             'department_id' => 'required|integer',
@@ -67,6 +148,46 @@ class TaskController extends Controller
             'd_status' => 'nullable|integer',
         ]);
         $res = Task::create($request->all());
+
+
+        $positions = Position::get()->where('department_id', $request->department_id)->values();
+
+        // Extract the position IDs
+        $positionIds = $positions->pluck('id')->toArray();
+        $users = User::whereHas('position', function ($query) use ($positionIds) {
+            $query->whereIn('id', $positionIds);
+        })->where('d_status', 1)->get();
+
+
+        $sendTo = [];
+
+        foreach ($users as $target) {
+            $targetDevices = $target->deviceTokens;
+
+            // Decode the JSON string into a PHP array
+            $data = json_decode($targetDevices, true);
+
+            // Extract tokens using Laravel collection methods
+            $tokens = collect($data)->pluck('token')->toArray();
+
+            $sendTo = array_merge($sendTo, $tokens);
+
+
+            Notification::create(["title" => "New Issue Reported", "details" => "Equipment: Extra Towels", "receiver_id" => $target->id, "redirect_url" => "/"]);
+        }
+
+
+        // TODO: CHnage
+        $issue = $res->issue;
+
+        $args['title'] = "New Issue Reported";
+        $args['body'] = $issue;
+        // $args['targetDevice'] = $deviceTokenIOS;
+        $args['targetDevices'] = $sendTo;
+
+        //TODO: ENABLE FIREBASE
+        // $this->notificationService->sendPushNotification($args, true);
+
         return  response()->json($res, 201);
     }
 
@@ -86,7 +207,7 @@ class TaskController extends Controller
         }
 
 
-        $res->issue;
+        // $res->issue;
         $res->department;
         $res->requestor->position->department;
         $res->assignee;
@@ -122,6 +243,8 @@ class TaskController extends Controller
     {
         $res = Task::find($id);
 
+        // $res->issue;
+
         if (!$res || !$res->count()) {
             return response()->json([
                 "data" => [],
@@ -131,6 +254,39 @@ class TaskController extends Controller
         }
 
         $res->update($request->all());
+
+        if ($request->assignee_id != null && $request->assignor_id != null) {
+
+
+            $target = User::get()->where('id', $request->assignee_id)->first();
+            $assignor = User::get()->where('id', $request->assignor_id)->first();
+
+
+            $targetDevices = $target->deviceTokens;
+
+
+
+            if ($targetDevices->count() > 0) {
+
+                $data = json_decode($targetDevices, true);
+
+                // Extract tokens using Laravel collection methods
+                $tokens = collect($data)->pluck('token')->toArray();
+
+                // $issue = $res->issue->name;
+                $issue = $res->issue;
+
+                $args['title'] = "New Task Assignment";
+                $args['body'] = "$assignor->first_name $assignor->last_name assigned you a task [$issue]";
+                $args['link'] = 'www.facebook.com';
+                // $args['targetDevice'] = $deviceTokenIOS;
+                $args['targetDevices'] = $tokens;
+
+
+                $sent = $this->notificationService->sendPushNotification($args, true);
+                Notification::create(["title" => "New Task Assignment", "details" => "$assignor->first_name $assignor->last_name assigned you a task [$issue]", "receiver_id" => $target->id, "redirect_url" => "/"]);
+            }
+        }
 
         return [
             "data" => $res,
@@ -225,20 +381,26 @@ class TaskController extends Controller
         // Generate an array of days in the current month
         $currentDate = now()->startOfMonth();
         while ($currentDate <= now()->endOfMonth()) {
-            $daysOfMonth[] = $currentDate->format('l');
+            $daysOfMonth[] = $currentDate->format('j'); // Get day of the month without leading zeros
             $currentDate->addDay();
         }
-
         // Initialize formatted data with counts set to 0 for each day of the month
         foreach ($daysOfMonth as $day) {
             $formattedData[$day] = 0;
         }
 
+
         // Update formatted data with actual counts from the retrieved data
         foreach ($issuesBySchedule as $issue) {
-            $scheduleDay = date('l', strtotime($issue->day)); // Extract day name from datetime
-            $formattedData[$scheduleDay] += $issue->total;
+            // Convert the day to an integer (assuming the day is already a numeric value)
+            // Convert the date string to a Carbon instance
+            $carbonDate = Carbon::createFromFormat('Y-m-d', $issue->day);
+
+            // Extract the day of the month
+            $dayOfMonth = $carbonDate->day;
+            $formattedData[$dayOfMonth] = $issue->total;
         }
+
 
         // Prepare the data in the format expected by the chart library
         $chartData = [
@@ -263,8 +425,8 @@ class TaskController extends Controller
         $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
         $mostReportedIssues = Task::whereBetween('schedule', [$startDate, $endDate])
-            ->select('issue_id', DB::raw('count(*) as total'))
-            ->groupBy('issue_id')
+            ->select('issue', DB::raw('count(*) as total'))
+            ->groupBy('issue')
             ->orderByDesc('total')
             ->limit(5) // You can adjust this limit as needed
             ->get();
