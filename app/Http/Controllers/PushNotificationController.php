@@ -23,7 +23,7 @@ class PushNotificationController extends Controller
     public function newTask()
     {
 
-        $target = User::get()->where('id', 2)->first();
+        $target = User::get()->where('id', 1)->first();
 
         $targetDevices = $target->deviceTokens;
 
@@ -38,6 +38,6 @@ class PushNotificationController extends Controller
         $args['body'] = "Network: No Internet";
         $args['targetDevices'] = $tokens;
 
-        return $this->notificationService->sendPushNotification($args, true);
+        $this->notificationService->sendPushNotification($args, true);
     }
 }

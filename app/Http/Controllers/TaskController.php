@@ -186,7 +186,7 @@ class TaskController extends Controller
         $args['targetDevices'] = $sendTo;
 
         //TODO: ENABLE FIREBASE
-        // $this->notificationService->sendPushNotification($args, true);
+        $this->notificationService->sendPushNotification($args, true);
 
         return  response()->json($res, 201);
     }
@@ -283,7 +283,7 @@ class TaskController extends Controller
                 $args['targetDevices'] = $tokens;
 
 
-                $sent = $this->notificationService->sendPushNotification($args, true);
+                $send = $this->notificationService->sendPushNotification($args, true);
                 Notification::create(["title" => "New Task Assignment", "details" => "$assignor->first_name $assignor->last_name assigned you a task [$issue]", "receiver_id" => $target->id, "redirect_url" => "/"]);
             }
         }
