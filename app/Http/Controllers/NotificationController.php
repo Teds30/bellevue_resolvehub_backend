@@ -33,7 +33,8 @@ class NotificationController extends Controller
 
     public function user_notifications($id)
     {
-        $res = Notification::get()->where('receiver_id', $id)->values();
+        $res = Notification::where('receiver_id', $id)->orderBy('created_at', 'desc') // Sort by newest first
+            ->take(10)->get();
 
         if (!$res || !$res->count()) {
             return response()->json([

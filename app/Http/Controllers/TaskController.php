@@ -275,6 +275,7 @@ class TaskController extends Controller
 
                 // $issue = $res->issue->name;
                 $issue = $res->issue;
+                $task_id = $res->id;
 
                 $args['title'] = "New Task Assignment";
                 $args['body'] = "$assignor->first_name $assignor->last_name assigned you a task [$issue]";
@@ -284,7 +285,7 @@ class TaskController extends Controller
 
 
                 $send = $this->notificationService->sendPushNotification($args, true);
-                Notification::create(["title" => "New Task Assignment", "details" => "$assignor->first_name $assignor->last_name assigned you a task [$issue]", "receiver_id" => $target->id, "redirect_url" => "/"]);
+                Notification::create(["title" => "New Task Assignment", "details" => "$assignor->first_name $assignor->last_name assigned you a task [$issue]", "receiver_id" => $target->id, "redirect_url" => "/tasks/$task_id"]);
             }
         }
 
