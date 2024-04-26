@@ -238,9 +238,9 @@ class DepartmentController extends Controller
     {
 
         $res2 = Task::where('department_id', $department_id)
-            ->whereDate('schedule', Carbon::today())
+            ->whereDate('schedule', '<=', Carbon::today())
             ->where('completed_marker_id', null)
-            ->where('d_status', 1)
+            ->where('d_status', 1)->orderBy('updated_at', 'asc')
             ->get()
             ->values();
 
