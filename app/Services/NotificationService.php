@@ -66,14 +66,16 @@ class NotificationService
                     'title' => $args['title'],
                     'body' => $args['body'],
                     'icon' => 'https://www.thebellevuemanila.com/wp-content/uploads/2022/08/fav.png',
-                    'link' => $args['link'],
+
                 ],
                 'fcm_options' => [
                     'link' => $args['link'],
+                    'click_action' => $args['link'],
                 ],
             ]);
 
             $message = CloudMessage::new()->withWebPushConfig($config);
+            $sendReport = $messaging->sendMulticast($message, $args['targetDevices']);
         } else {
 
             $message = CloudMessage::withTarget('token', $args['targetDevice'])
