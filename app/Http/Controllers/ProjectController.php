@@ -53,10 +53,9 @@ class ProjectController extends Controller
         $month = $request->input('month', null);
         $year = $request->input('year', null);
         $filterBy = $request->input('filter_by', null);
+        $departmentId = $request->input('department_id', null);
 
-
-
-        $tasks = Project::where('d_status', 1)->with('department');
+        $tasks = Project::where('d_status', 1)->where('department_id', $departmentId)->with('department');
 
         if ($filterBy == 'today') {
             $tasks = $tasks->whereDate('created_at', Carbon::today());

@@ -59,11 +59,11 @@ class TaskController extends Controller
         $year = $request->input('year', null);
         $custom = $request->input('custom', null);
         $filterBy = $request->input('filter_by', null);
-
+        $departmentId = $request->input('department_id', null);
 
 
         // $tasks = Task::where('d_status', 1)->with('issue')->with('department')->with('assignee')->with('requestor')->with('assignor');
-        $tasks = Task::where('d_status', 1)->with('department')->with('assignee')->with('requestor')->with('assignor');
+        $tasks = Task::where('d_status', 1)->where('department_id', $departmentId)->with('department')->with('assignee')->with('requestor')->with('assignor');
 
         if ($filterBy == 'today') {
             $tasks = $tasks->whereDate('created_at', Carbon::today());
