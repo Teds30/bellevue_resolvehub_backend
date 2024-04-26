@@ -76,11 +76,11 @@ Route::get('user_ongoing_tasks/{id}', [UserController::class, "user_ongoing_task
 Route::get('user_done_tasks/{id}', [UserController::class, "user_done_tasks"]);
 Route::get('user_pending_tasks/{id}', [UserController::class, "user_pending_tasks"]);
 Route::get('user_assigned_projects/{id}', [UserController::class, "user_assigned_projects"]);
-Route::get('projects_page', [ProjectController::class, "paginate"]);
+Route::post('projects_page', [ProjectController::class, "paginate"]);
 
 
 Route::get('tasks', [TaskController::class, "index"]);
-Route::get('tasks_page', [TaskController::class, "paginate"]);
+Route::post('tasks_page', [TaskController::class, "paginate"]);
 Route::get('tasks/{id}', [TaskController::class, "show"]);
 Route::post('tasks', [TaskController::class, "store"]);
 Route::patch('tasks/{id}', [TaskController::class, "update"]);
@@ -127,7 +127,7 @@ Route::middleware('auth:api')->group(function () {
 Route::get('department_assigned_tasks/{id}', [DepartmentController::class, "department_assigned_tasks"]);
 Route::get('department_ongoing_tasks/{id}', [DepartmentController::class, "department_ongoing_tasks"]);
 Route::get('department_pending_tasks/{id}', [DepartmentController::class, "department_pending_tasks"]);
-Route::get('department_done_tasks/{id}', [DepartmentController::class, "department_done_tasks"]);
+Route::post('department_done_tasks/{id}', [DepartmentController::class, "department_done_tasks"]);
 
 
 // Route::post('register', [AuthController::class, "register"]);
