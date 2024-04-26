@@ -51,16 +51,29 @@ class NotificationService
 
 
         if ($multiple) {
-            $message = CloudMessage::new()->withNotification($notification)
-                // ->withData(['click_action' => 'https://www.facebook.com'])
-                ->withDefaultSounds()
-                ->withApnsConfig(
-                    ApnsConfig::new()
-                        ->withSound('bingbong.aiff')
-                        ->withBadge(1)
-                );; // Any instance of Kreait\Messaging\Message
+            // $message = CloudMessage::new()->withNotification($notification)
+            //     // ->withData(['click_action' => 'https://www.facebook.com'])
+            //     ->withDefaultSounds()
+            //     ->withApnsConfig(
+            //         ApnsConfig::new()
+            //             ->withSound('bingbong.aiff')
+            //             ->withBadge(1)
+            //     );; // Any instance of Kreait\Messaging\Message
 
-            $sendReport = $messaging->sendMulticast($message, $args['targetDevices']);
+            // $sendReport = $messaging->sendMulticast($message, $args['targetDevices']);
+            $config = WebPushConfig::fromArray([
+                'notification' => [
+                    'title' => $args['title'],
+                    'body' => $args['body'],
+                    'icon' => 'https://www.thebellevuemanila.com/wp-content/uploads/2022/08/fav.png',
+                    'link' => $args['link'],
+                ],
+                'fcm_options' => [
+                    'link' => $args['link'],
+                ],
+            ]);
+
+            $message = CloudMessage::new()->withWebPushConfig($config);
         } else {
 
             $message = CloudMessage::withTarget('token', $args['targetDevice'])
