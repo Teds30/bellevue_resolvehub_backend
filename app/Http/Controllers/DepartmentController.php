@@ -204,12 +204,12 @@ class DepartmentController extends Controller
     public function department_assigned_tasks($department_id)
     {
 
-        $res2 = Task::get()
-            ->where('department_id', $department_id)
+        $res2 = Task::where('department_id', $department_id)
             ->where('schedule', null)
             ->where('assignee_id', null)
             ->where('completed_marker_id', null)
-            ->values();
+            ->orderBy('created_at', 'desc')
+            ->get();
 
 
         if (!$res2 || !$res2->count()) {
@@ -240,7 +240,8 @@ class DepartmentController extends Controller
         $res2 = Task::where('department_id', $department_id)
             ->whereDate('schedule', '<=', Carbon::today())
             ->where('completed_marker_id', null)
-            ->where('d_status', 1)->orderBy('updated_at', 'asc')
+            ->where('d_status', 1)
+            ->orderBy('created_at', 'desc')
             ->get()
             ->values();
 
@@ -273,6 +274,7 @@ class DepartmentController extends Controller
             ->whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', null)
             ->where('d_status', 1)
+            ->orderBy('updated_at', 'desc')
             ->get()
             ->values();
 
@@ -305,7 +307,8 @@ class DepartmentController extends Controller
         $tmp = Task::where('department_id', $department_id)
             // ->whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', '!=', null)
-            ->where('d_status', 1);
+            ->where('d_status', 1)
+            ->orderBy('updated_at', 'desc');
 
         if ($today) {
             $tmp = $tmp->whereDate('updated_at', '=', Carbon::today());
