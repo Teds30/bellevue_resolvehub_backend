@@ -60,6 +60,7 @@ class TaskController extends Controller
         $custom = $request->input('custom', null);
         $filterBy = $request->input('filter_by', null);
         $departmentId = $request->input('department_id', null);
+        $status = $request->input('status', null);
 
 
         // $tasks = Task::where('d_status', 1)->with('issue')->with('department')->with('assignee')->with('requestor')->with('assignor');
@@ -85,6 +86,30 @@ class TaskController extends Controller
         }
         if ($filterBy == 'custom' && $custom) {
             $tasks = $tasks->whereDate('created_at', Carbon::parse($custom)->format('Y-m-d'));
+        }
+
+        if ($status) {
+
+            $_status = null;
+
+            switch ($status) {
+                case 'request':
+                    $_status = 0;
+                    break;
+                case 'active':
+                    $_status = 1;
+                    break;
+                case 'pending':
+                    $_status = 2;
+                    break;
+                case 'cancelled':
+                    $_status = 3;
+                    break;
+                case 'accomplished':
+                    $_status = 4;
+                    break;
+            }
+            $tasks = $tasks->where('status', $_status);
         }
 
         $tasks = $tasks
