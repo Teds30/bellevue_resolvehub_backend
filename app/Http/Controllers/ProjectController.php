@@ -163,8 +163,9 @@ class ProjectController extends Controller
                 //  $args['targetDevice'] = $deviceTokenIOS;
                 $args['targetDevices'] = $tokens;
 
-                // TODO: ENABLE FIREBASE
-                $sent = $this->notificationService->sendPushNotification($args, true);
+                if ($tokens) {
+                    $this->notificationService->sendPushNotification($args, true);
+                }
             }
         }
 
