@@ -311,7 +311,10 @@ class ProjectController extends Controller
                 // $args['targetDevice'] = $deviceTokenIOS;
                 $args['targetDevices'] = $tokens;
 
-                $sent = $this->notificationService->sendPushNotification($args, true);
+                if ($tokens) {
+
+                    $sent = $this->notificationService->sendPushNotification($args, true);
+                }
             }
         }
 
