@@ -9,6 +9,7 @@ use App\Models\Position;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
+use DateTime;
 use Illuminate\Http\Request;
 
 class DepartmentController extends Controller
@@ -237,7 +238,9 @@ class DepartmentController extends Controller
     public function department_ongoing_tasks($department_id)
     {
 
+
         $res2 = Task::where('department_id', $department_id)
+
             ->whereDate('schedule', '<=', Carbon::today())
             ->where('completed_marker_id', null)
             ->where('d_status', 1)
@@ -269,14 +272,14 @@ class DepartmentController extends Controller
 
     public function department_pending_tasks($department_id)
     {
+        $date = Carbon::today('Asia/Manila')->toDateString();
 
         $res2 = Task::where('department_id', $department_id)
             ->whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', null)
             ->where('d_status', 1)
             ->orderBy('updated_at', 'desc')
-            ->get()
-            ->values();
+            ->get();
 
 
         if (!$res2 || !$res2->count()) {

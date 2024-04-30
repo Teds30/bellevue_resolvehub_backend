@@ -166,7 +166,8 @@ class UserController extends Controller
 
 
         foreach ($res2 as $task) {
-            $task->issue;
+            // $task->issue;
+            $task->assignee;
             $task->requestor;
         }
 
@@ -195,7 +196,8 @@ class UserController extends Controller
 
 
         $res2 = Task::where('assignee_id', $user_id)
-            ->whereDate('schedule', Carbon::today())
+            ->whereDate('schedule', '<=', Carbon::today())
+            ->where('completed_marker_id', null)
             ->where('d_status', 1)
             ->get()
             ->values();
@@ -211,8 +213,9 @@ class UserController extends Controller
 
 
         foreach ($res2 as $task) {
+            $task->assignee;
             $task->requestor;
-            $task->issue;
+            // $task->issue;
         }
 
         return [
@@ -248,7 +251,8 @@ class UserController extends Controller
 
 
         foreach ($res2 as $task) {
-            $task->issue;
+            // $task->issue;
+            $task->assignee;
             $task->requestor;
         }
 
@@ -262,7 +266,7 @@ class UserController extends Controller
     {
 
 
-        $res2 = User::get()->where('id', $user_id)->first();
+        $res2 = Project::get()->where('incharge_id', $user_id)->first();
 
 
         if (!$res2 || !$res2->count()) {
@@ -311,6 +315,7 @@ class UserController extends Controller
 
         foreach ($res2 as $task) {
             $task->issue;
+            $task->assignee;
             $task->requestor;
         }
 
