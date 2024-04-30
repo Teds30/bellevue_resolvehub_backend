@@ -176,7 +176,8 @@ class ProjectController extends Controller
 
     public function department_projects($id)
     {
-        $res = Project::get()->where('department_id', $id)->where('d_status', 1);
+        $res = Project::where('department_id', $id)->where('d_status', 1)
+            ->orderBy('updated_at', 'desc')->get();
 
         if (!$res || !$res->count()) {
             return response()->json([
@@ -194,7 +195,7 @@ class ProjectController extends Controller
 
     public function user_projects($id)
     {
-        $res = Project::get()->where('requestor_id', $id)->where('d_status', 1)->values();
+        $res = Project::where('requestor_id', $id)->where('d_status', 1)->orderBy('updated_at', 'desc')->get();
 
         if (!$res || !$res->count()) {
             return response()->json([
@@ -211,7 +212,7 @@ class ProjectController extends Controller
     }
     public function assigned_projects($id)
     {
-        $res = Project::get()->where('incharge_id', $id)->where('d_status', 1)->values();
+        $res = Project::where('incharge_id', $id)->where('d_status', 1)->orderBy('updated_at', 'desc')->get();
 
         if (!$res || !$res->count()) {
             return response()->json([
