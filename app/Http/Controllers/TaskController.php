@@ -460,7 +460,7 @@ class TaskController extends Controller
             ->select('issue', DB::raw('count(*) as total'))
             ->groupBy('issue')
             ->orderByDesc('total')
-            ->limit(5) // You can adjust this limit as needed
+            ->limit(50) // You can adjust this limit as needed
             ->get();
 
         foreach ($mostReportedIssues as $issue) {
