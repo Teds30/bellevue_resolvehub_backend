@@ -66,7 +66,7 @@ class TaskController extends Controller
         // $tasks = Task::where('d_status', 1)->with('issue')->with('department')->with('assignee')->with('requestor')->with('assignor');
         $tasks = Task::where('d_status', 1)->where('department_id', $departmentId)->with('department')->with('assignee')->with('requestor')->with('assignor');
 
-        if ($filterBy == 'today') {
+        if ($filterBy == 'daily') {
             $tasks = $tasks->whereDate('created_at', Carbon::today());
         }
         if ($filterBy == 'this_week') {
