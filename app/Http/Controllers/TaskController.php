@@ -475,24 +475,47 @@ class TaskController extends Controller
         return $mostReportedIssues;
     }
 
-    public function tasks_metric($department_id)
+    public function tasks_metric($department_id, $day)
     {
+
+
+
+
+        $unassigned = null;
+        $pending = null;
+        $onGoing = null;
+        $cancelled = null;
+        $done = null;
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
         $unassigned = Task::where('assignee_id', null)->where('status', 0)->where('department_id', $department_id)->count();
         $pending = Task::where('department_id', $department_id)
             ->whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', null)
             ->where('d_status', 1)->count();
-        $onGoing = Task::whereDate('schedule', Carbon::today())
+
+        $onGoing = Task::whereDate('schedule', '<=', Carbon::today())
             ->where('department_id', $department_id)
+            ->where('completed_marker_id', null)
             ->where('d_status', 1)
             ->where('status', '!=', 3)
             ->count();
 
         $cancelled = Task::where('status', 3)->where('department_id', $department_id)->count();
 
-        $total = Task::where('d_status', 1)->where('department_id', $department_id)->count();
+        $done = Task::where('status', 4)
+            ->where('completed_marker_id', '!=', null)
+            ->where('d_status', 1)
+            ->where('department_id', $department_id)->count();
 
-        return ["unassigned" => $unassigned, "pending" => $pending, "ongoing" => $onGoing, "cancelled" => $cancelled, "total" => $total];
+        $total = Task::where('d_status', 1)->where('department_id', $department_id)->count();
+        // Task::whereBetween('schedule', [$startDate, $endDate])
+
+
+
+
+        return ["unassigned" => $unassigned, "pending" => $pending, "ongoing" => $onGoing, "cancelled" => $cancelled, "done" => $done, "total" => $total];
     }
 }
