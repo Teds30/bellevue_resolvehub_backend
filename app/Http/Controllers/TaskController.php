@@ -61,11 +61,16 @@ class TaskController extends Controller
         $filterBy = $request->input('filter_by', null);
         $departmentId = $request->input('department_id', null);
         $status = $request->input('status', null);
+        $searchField = $request->input('searchField', null);
+        $search = $request->input('search', null);
 
 
         // $tasks = Task::where('d_status', 1)->with('issue')->with('department')->with('assignee')->with('requestor')->with('assignor');
         $tasks = Task::where('d_status', 1)->where('department_id', $departmentId)->with('department')->with('assignee')->with('requestor')->with('assignor');
 
+        if ($searchField && $search) {
+            $tasks = $tasks->where($searchField, 'like', "%$search%");
+        }
         if ($filterBy == 'daily') {
             $tasks = $tasks->whereDate('created_at', Carbon::today());
         }
