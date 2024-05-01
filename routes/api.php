@@ -111,7 +111,7 @@ Route::get('issues_metric/week', [TaskController::class, "issues_metric_week"]);
 Route::get('issues_metric/month', [TaskController::class, "issues_metric_month"]);
 
 Route::get('issues_most_reported', [TaskController::class, "issues_most_reported"]);
-Route::get('tasks_metric/{department_id}', [TaskController::class, "tasks_metric"]);
+Route::get('tasks_metric/{department_id}/{day}', [TaskController::class, "tasks_metric"]);
 
 //TODO: Permissions
 
@@ -128,6 +128,7 @@ Route::get('department_assigned_tasks/{id}', [DepartmentController::class, "depa
 Route::get('department_ongoing_tasks/{id}', [DepartmentController::class, "department_ongoing_tasks"]);
 Route::get('department_pending_tasks/{id}', [DepartmentController::class, "department_pending_tasks"]);
 Route::post('department_done_tasks/{id}', [DepartmentController::class, "department_done_tasks"]);
+Route::post('department_cancelled_tasks/{id}', [DepartmentController::class, "department_cancelled_tasks"]);
 
 
 // Route::post('register', [AuthController::class, "register"]);
