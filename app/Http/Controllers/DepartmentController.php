@@ -310,6 +310,46 @@ class DepartmentController extends Controller
         $tmp = Task::where('department_id', $department_id)
             // ->whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', '!=', null)
+            ->where('status', 4)
+            ->where('d_status', 1)
+            ->orderBy('updated_at', 'desc');
+
+        if ($today) {
+            $tmp = $tmp->whereDate('updated_at', '=', Carbon::today());
+        }
+
+        $res2 = $tmp->get()
+            ->values();
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No accomplished tasks found for this department."
+            ], 404);
+        }
+
+        foreach ($res2 as $task) {
+            $task->requestor;
+            $task->assignee;
+            // $task->issue;
+        }
+
+        return [
+            "data" => $res2,
+            "success" => true,
+        ];
+    }
+
+    public function department_cancelled_tasks($department_id, Request $request)
+    {
+
+        $today = $request->today ?? false;
+
+        $tmp = Task::where('department_id', $department_id)
+            // ->whereDate('schedule', '>', Carbon::today())
+            ->where('status', 3)
             ->where('d_status', 1)
             ->orderBy('updated_at', 'desc');
 
