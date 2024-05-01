@@ -285,13 +285,54 @@ class UserController extends Controller
             "message" => null
         ];
     }
-    public function user_done_tasks($user_id, $today = false)
+    public function user_done_tasks(Request $request, $id)
     {
 
-        $tmp = Task::where('assignee_id', $user_id)
+        $today = $request->today ?? false;
+        $tmp = Task::where('assignee_id', $id)
             // ->whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', '!=', null)
             ->where('d_status', 1);
+
+
+        if ($today) {
+
+            $tmp = $tmp->whereDate('updated_at', Carbon::today());
+        }
+
+        $res2 = $tmp->get()
+            ->values();
+
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No accomplished tasks found."
+            ], 404);
+        }
+
+
+        foreach ($res2 as $task) {
+            $task->issue;
+            $task->assignee;
+            $task->requestor;
+        }
+
+        return [
+            "data" => $res2,
+            "success" => true,
+        ];
+    }
+    public function user_cancelled_tasks(Request $request, $id)
+    {
+
+        $today = $request->today ?? false;
+        $tmp = Task::where('assignee_id', $id)
+            ->where('status', 3)
+            ->where('d_status', 1)
+            ->orderBy('updated_at', 'desc');
 
 
         if ($today) {

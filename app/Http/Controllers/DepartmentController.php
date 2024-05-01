@@ -302,12 +302,12 @@ class DepartmentController extends Controller
         ];
     }
 
-    public function department_done_tasks($department_id, Request $request)
+    public function department_done_tasks(Request $request, $id,)
     {
 
-        $today = $request->today ?? false;
+        $today = $request->input('today', false);
 
-        $tmp = Task::where('department_id', $department_id)
+        $tmp = Task::where('department_id', $id)
             // ->whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', '!=', null)
             ->where('status', 4)
@@ -315,7 +315,7 @@ class DepartmentController extends Controller
             ->orderBy('updated_at', 'desc');
 
         if ($today) {
-            $tmp = $tmp->whereDate('updated_at', '=', Carbon::today());
+            $tmp = $tmp->whereDate('updated_at', Carbon::today());
         }
 
         $res2 = $tmp->get()
@@ -342,19 +342,19 @@ class DepartmentController extends Controller
         ];
     }
 
-    public function department_cancelled_tasks($department_id, Request $request)
+    public function department_cancelled_tasks(Request $request, $id)
     {
 
         $today = $request->today ?? false;
 
-        $tmp = Task::where('department_id', $department_id)
+        $tmp = Task::where('department_id', $id)
             // ->whereDate('schedule', '>', Carbon::today())
             ->where('status', 3)
             ->where('d_status', 1)
             ->orderBy('updated_at', 'desc');
 
         if ($today) {
-            $tmp = $tmp->whereDate('updated_at', '=', Carbon::today());
+            $tmp = $tmp->whereDate('updated_at', Carbon::today());
         }
 
         $res2 = $tmp->get()
