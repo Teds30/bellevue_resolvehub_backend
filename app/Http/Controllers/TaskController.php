@@ -400,11 +400,16 @@ class TaskController extends Controller
         return $chartData;
     }
 
-    public function issues_metric_month()
+    public function issues_metric_month(Request $request)
     {
+
+        $month = $request->input('month');
+        $year = $request->input('year');
         // Calculate the start and end date for the current month
-        $startDate = now()->startOfMonth()->toDateString(); // Start of the current month
-        $endDate = now()->endOfMonth()->toDateString(); // End of the current month
+        // $startDate = now()->startOfMonth()->toDateString(); 
+        // $endDate = now()->endOfMonth()->toDateString(); 
+        $startDate = Carbon::createFromFormat('Y-m', $year . '-' . $month)->startOfMonth()->toDateString();
+        $endDate = Carbon::createFromFormat('Y-m', $year . '-' . $month)->endOfMonth()->toDateString();
 
         // Retrieve data for the current month
         $issuesBySchedule = Task::whereBetween('schedule', [$startDate, $endDate])
@@ -453,6 +458,78 @@ class TaskController extends Controller
         return $chartData;
     }
 
+    public function issues_metric_year(Request $request)
+    {
+        // $monthYear = $request->input('monthYear');
+        $year = $request->input('year');
+
+
+        $issuesByYear = Task::whereYear('created_at', $year)
+            ->select(DB::raw('DATE(created_at) as month'), DB::raw('count(*) as total'))
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->get();
+
+        // return $issuesByYear;
+
+        $monthsLabel = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $export = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+        $i = 1;
+
+        // Initialize an array to hold total counts for each month
+        $monthlyTotals = [
+            "Jan" => 0,
+            "Feb" => 0,
+            "Mar" => 0,
+            "Apr" => 0,
+            "May" => 0,
+            "Jun" => 0,
+            "Jul" => 0,
+            "Aug" => 0,
+            "Sep" => 0,
+            "Oct" => 0,
+            "Nov" => 0,
+            "Dec" => 0
+        ];
+
+        // Map the total counts to corresponding months
+        foreach ($issuesByYear as $data) {
+            $monthAbbreviation = date('M', strtotime($data['month']));
+            $monthlyTotals[$monthAbbreviation] += $data['total'];
+        }
+
+        // Prepare the final data structure
+        $result = [
+            "month" => array_keys($monthlyTotals),
+            "data" => array_values($monthlyTotals)
+        ];
+
+
+        // return ['month' => $monthsLabel, 'data' => $export];
+
+        // foreach ($issuesByYear as $issue) {
+        //     for($i; $i < 12; $i++) {
+        //         if(Carbon::) {}
+        //     }
+        // }
+
+
+
+
+        // Prepare the data in the format expected by the chart library
+        $chartData = [
+            'xAxis' => [["data" => array_keys($monthlyTotals)]],
+            'series' => [
+                [
+                    'data' => array_values($monthlyTotals),
+                    'area' => true,
+                ],
+            ],
+        ];
+
+        return $chartData;
+    }
+
 
     public function issues_most_reported(Request $request)
     {
@@ -478,9 +555,6 @@ class TaskController extends Controller
     public function tasks_metric($department_id, $day)
     {
 
-
-
-
         $unassigned = null;
         $pending = null;
         $onGoing = null;
@@ -490,32 +564,77 @@ class TaskController extends Controller
         $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
         $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
-        $unassigned = Task::where('assignee_id', null)->where('status', 0)->where('department_id', $department_id)->count();
+
+        $unassigned = Task::where('assignee_id', null)
+            ->where('status', 0)
+            ->where('department_id', $department_id);
+
         $pending = Task::where('department_id', $department_id)
             ->whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', null)
-            ->where('d_status', 1)->count();
+            ->where('d_status', 1);
 
         $onGoing = Task::whereDate('schedule', '<=', Carbon::today())
             ->where('department_id', $department_id)
             ->where('completed_marker_id', null)
             ->where('d_status', 1)
-            ->where('status', '!=', 3)
-            ->count();
+            ->where('status', '!=', 3);
 
-        $cancelled = Task::where('status', 3)->where('department_id', $department_id)->count();
+        $cancelled = Task::where('status', 3)->where('department_id', $department_id);
 
         $done = Task::where('status', 4)
             ->where('completed_marker_id', '!=', null)
             ->where('d_status', 1)
-            ->where('department_id', $department_id)->count();
+            ->where('department_id', $department_id);
 
-        $total = Task::where('d_status', 1)->where('department_id', $department_id)->count();
+        // $total = Task::where('d_status', 1)->where('department_id', $department_id);
         // Task::whereBetween('schedule', [$startDate, $endDate])
 
+        switch ($day) {
+            case 'daily':
+                $unassigned = $unassigned->whereDate('created_at', Carbon::now());
+                $pending = $pending->whereDate('created_at', Carbon::now());
+                $onGoing = $onGoing->whereDate('updated_at', Carbon::now());
+                $cancelled = $cancelled->whereDate('updated_at', Carbon::now());
+                $done = $done->whereDate('updated_at', Carbon::now());
+                // ->count();
+                break;
+            case 'weekly':
+                $unassigned = $unassigned->whereBetween('created_at', [$startDate, $endDate]);
+                $pending = $pending->whereBetween('created_at', [$startDate, $endDate]);
+                $onGoing = $onGoing->whereBetween('updated_at', [$startDate, $endDate]);
+                $cancelled = $cancelled->whereBetween('updated_at', [$startDate, $endDate]);
+                $done = $done->whereBetween('updated_at', [$startDate, $endDate]);
+                // ->count();
+                break;
+            case 'monthly':
+                $unassigned = $unassigned->whereMonth('created_at', Carbon::now()->month);
+                $pending = $pending->whereMonth('created_at', Carbon::now()->month);
+                $onGoing = $onGoing->whereMonth('updated_at', Carbon::now()->month);
+                $cancelled = $cancelled->whereMonth('updated_at', Carbon::now()->month);
+                $done = $done->whereMonth('updated_at', Carbon::now()->month);
+                break;
+            case 'yearly':
+                $unassigned = $unassigned->whereYear('created_at', Carbon::now()->year);
+                $pending = $pending->whereYear('created_at', Carbon::now()->year);
+                $onGoing = $onGoing->whereYear('updated_at', Carbon::now()->year);
+                $cancelled = $cancelled->whereYear('updated_at', Carbon::now()->year);
+                $done = $done->whereYear('updated_at', Carbon::now()->year);
+                break;
+        }
 
 
 
-        return ["unassigned" => $unassigned, "pending" => $pending, "ongoing" => $onGoing, "cancelled" => $cancelled, "done" => $done, "total" => $total];
+        $totals = [
+            "unassigned" => $unassigned->count(),
+            "pending" => $pending->count(),
+            "ongoing" => $onGoing->count(),
+            "cancelled" => $cancelled->count(),
+            "done" => $done->count(),
+        ];
+
+        $totals = array_sum($totals);
+
+        return ["unassigned" => $unassigned->count(), "pending" => $pending->count(), "ongoing" => $onGoing->count(), "cancelled" => $cancelled->count(), "done" => $done->count(), "total" => $totals];
     }
 }
