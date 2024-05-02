@@ -93,13 +93,14 @@ class AuthController extends Controller
 
     public function updatePassword(Request $request)
     {
+
         $fields = $request->validate([
-            'username' => 'required|string',
+            'id' => 'required|integer',
             'password' => 'required|string'
         ]);
 
-        // Check if the user with the provided username exists
-        $user = User::where('username', $fields['email'])->first();
+        $user = User::where('id', $fields['id'])->get()->first();
+
 
         if (!$user) {
             return response([
@@ -107,7 +108,6 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Update the user's password
         $user->update([
             'password' => bcrypt($fields['password']) // You should hash the password
         ]);

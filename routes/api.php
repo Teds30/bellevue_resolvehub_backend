@@ -119,6 +119,7 @@ Route::post('tasks_metric/{department_id}/{day}', [TaskController::class, "tasks
 
 Route::post('login', [AuthController::class, "login"]);
 Route::post('register', [AuthController::class, "register"]);
+Route::post('forgot_password', [AuthController::class, "updatePassword"]);
 
 Route::middleware('auth:api')->group(function () {
     Route::get('user_data', [UserController::class, "user_data"]);
