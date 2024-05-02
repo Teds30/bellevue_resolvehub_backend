@@ -552,8 +552,11 @@ class TaskController extends Controller
         return $mostReportedIssues;
     }
 
-    public function tasks_metric($department_id, $day)
+    public function tasks_metric(Request $request, $department_id, $day)
     {
+
+        $month = $request->input('month');
+        $year = $request->input('year');
 
         $unassigned = null;
         $pending = null;
@@ -608,18 +611,18 @@ class TaskController extends Controller
                 // ->count();
                 break;
             case 'monthly':
-                $unassigned = $unassigned->whereMonth('created_at', Carbon::now()->month);
-                $pending = $pending->whereMonth('created_at', Carbon::now()->month);
-                $onGoing = $onGoing->whereMonth('updated_at', Carbon::now()->month);
-                $cancelled = $cancelled->whereMonth('updated_at', Carbon::now()->month);
-                $done = $done->whereMonth('updated_at', Carbon::now()->month);
+                $unassigned = $unassigned->whereMonth('created_at', $month);
+                $pending = $pending->whereMonth('created_at', $month);
+                $onGoing = $onGoing->whereMonth('updated_at', $month);
+                $cancelled = $cancelled->whereMonth('updated_at', $month);
+                $done = $done->whereMonth('updated_at', $month);
                 break;
             case 'yearly':
-                $unassigned = $unassigned->whereYear('created_at', Carbon::now()->year);
-                $pending = $pending->whereYear('created_at', Carbon::now()->year);
-                $onGoing = $onGoing->whereYear('updated_at', Carbon::now()->year);
-                $cancelled = $cancelled->whereYear('updated_at', Carbon::now()->year);
-                $done = $done->whereYear('updated_at', Carbon::now()->year);
+                $unassigned = $unassigned->whereYear('created_at', $year);
+                $pending = $pending->whereYear('created_at', $year);
+                $onGoing = $onGoing->whereYear('updated_at', $year);
+                $cancelled = $cancelled->whereYear('updated_at', $year);
+                $done = $done->whereYear('updated_at', $year);
                 break;
         }
 
