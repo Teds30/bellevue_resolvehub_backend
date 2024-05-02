@@ -112,8 +112,11 @@ Route::get('issues_metric/week', [TaskController::class, "issues_metric_week"]);
 Route::post('issues_metric/month', [TaskController::class, "issues_metric_month"]);
 Route::post('issues_metric/year', [TaskController::class, "issues_metric_year"]);
 
+
 Route::get('issues_most_reported', [TaskController::class, "issues_most_reported"]);
 Route::post('tasks_metric/{department_id}/{day}', [TaskController::class, "tasks_metric"]);
+
+Route::post('projects_metric/{department_id}/{day}', [ProjectController::class, "projects_metric"]);
 
 //TODO: Permissions
 

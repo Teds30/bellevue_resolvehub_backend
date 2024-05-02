@@ -352,4 +352,86 @@ class ProjectController extends Controller
             "message" => "Successfully deleted."
         ];
     }
+
+    public function projects_metric(Request $request, $department_id, $day)
+    {
+
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        $request = null;
+        $pending = null;
+        $onGoing = null;
+        $cancelled = null;
+        $done = null;
+        $rejected = null;
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+
+        $project = Project::where('department_id', $department_id);
+
+
+        $request = Project::where('department_id', $department_id)->where('status', 0);
+        $pending = Project::where('department_id', $department_id)->where('status', 1);
+        $onGoing = Project::where('department_id', $department_id)->where('status', 2);
+        $cancelled = Project::where('department_id', $department_id)->where('status', 3);
+        $done = Project::where('department_id', $department_id)->where('status', 4);
+        $rejected = Project::where('department_id', $department_id)->where('status', 5);
+
+        // return ['ps' => $request->get()];
+
+        switch ($day) {
+            case 'daily':
+                $request = $request->whereDate('created_at', Carbon::now());
+                $pending = $pending->whereDate('created_at', Carbon::now());
+                $onGoing = $onGoing->whereDate('updated_at', Carbon::now());
+                $cancelled = $cancelled->whereDate('updated_at', Carbon::now());
+                $done = $done->whereDate('updated_at', Carbon::now());
+                $rejected = $rejected->whereDate('updated_at', Carbon::now());
+                // ->count();
+                break;
+            case 'weekly':
+                $request = $request->whereBetween('created_at', [$startDate, $endDate]);
+                $pending = $pending->whereBetween('created_at', [$startDate, $endDate]);
+                $onGoing = $onGoing->whereBetween('updated_at', [$startDate, $endDate]);
+                $cancelled = $cancelled->whereBetween('updated_at', [$startDate, $endDate]);
+                $done = $done->whereBetween('updated_at', [$startDate, $endDate]);
+                $rejected = $rejected->whereBetween('updated_at', [$startDate, $endDate]);
+                // ->count();
+                break;
+            case 'monthly':
+                $request = $request->whereMonth('created_at', $month);
+                $pending = $pending->whereMonth('created_at', $month);
+                $onGoing = $onGoing->whereMonth('updated_at', $month);
+                $cancelled = $cancelled->whereMonth('updated_at', $month);
+                $done = $done->whereMonth('updated_at', $month);
+                $rejected = $rejected->whereMonth('updated_at', $month);
+                break;
+            case 'yearly':
+                $request = $request->whereYear('created_at', $year);
+                $pending = $pending->whereYear('created_at', $year);
+                $onGoing = $onGoing->whereYear('updated_at', $year);
+                $cancelled = $cancelled->whereYear('updated_at', $year);
+                $done = $done->whereYear('updated_at', $year);
+                $rejected = $rejected->whereYear('updated_at', $year);
+                break;
+        }
+
+
+
+        $totals = [
+            "request" => $request->count(),
+            "pending" => $pending->count(),
+            "ongoing" => $onGoing->count(),
+            "cancelled" => $cancelled->count(),
+            "done" => $done->count(),
+            "rejected" => $rejected->count(),
+        ];
+
+        $totals = array_sum($totals);
+
+        return ["request" => $request->count(), "pending" => $pending->count(), "ongoing" => $onGoing->count(), "cancelled" => $cancelled->count(), "done" => $done->count(), "rejected" => $rejected->count(), "total" => $totals];
+    }
 }
