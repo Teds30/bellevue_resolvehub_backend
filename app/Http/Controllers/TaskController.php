@@ -202,8 +202,8 @@ class TaskController extends Controller
 
             $sendTo = array_merge($sendTo, $tokens);
 
-
-            Notification::create(["title" => "New Issue Reported", "details" => "Equipment: Extra Towels", "receiver_id" => $target->id, "redirect_url" => "/"]);
+            $issue = $res->issue;
+            Notification::create(["title" => "New Issue Reported", "details" => $issue, "receiver_id" => $target->id, "redirect_url" => "/"]);
         }
 
 
