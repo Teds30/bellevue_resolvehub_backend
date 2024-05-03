@@ -354,16 +354,16 @@ class TaskController extends Controller
     }
 
 
-    public function issues_metric_week()
+    public function issues_metric_week($department_id)
     {
 
 
         $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
         $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
-        $issuesBySchedule = Task::whereBetween('schedule', [$startDate, $endDate])
-            ->select(DB::raw('DATE(schedule) as day'), DB::raw('count(*) as total'))
-            ->groupBy(DB::raw('DATE(schedule)'))
+        $issuesBySchedule = Task::where('department_id', $department_id)->whereBetween('created_at', [$startDate, $endDate])
+            ->select(DB::raw('DATE(created_at) as day'), DB::raw('count(*) as total'))
+            ->groupBy(DB::raw('DATE(created_at)'))
             ->get();
 
 
@@ -400,7 +400,7 @@ class TaskController extends Controller
         return $chartData;
     }
 
-    public function issues_metric_month(Request $request)
+    public function issues_metric_month(Request $request, $department_id)
     {
 
         $month = $request->input('month');
@@ -412,9 +412,9 @@ class TaskController extends Controller
         $endDate = Carbon::createFromFormat('Y-m', $year . '-' . $month)->endOfMonth()->toDateString();
 
         // Retrieve data for the current month
-        $issuesBySchedule = Task::whereBetween('schedule', [$startDate, $endDate])
-            ->select(DB::raw('DATE(schedule) as day'), DB::raw('count(*) as total'))
-            ->groupBy(DB::raw('DATE(schedule)'))
+        $issuesBySchedule = Task::where('department_id', $department_id)->whereBetween('created_at', [$startDate, $endDate])
+            ->select(DB::raw('DATE(created_at) as day'), DB::raw('count(*) as total'))
+            ->groupBy(DB::raw('DATE(created_at)'))
             ->get();
 
         $formattedData = [];
@@ -458,13 +458,13 @@ class TaskController extends Controller
         return $chartData;
     }
 
-    public function issues_metric_year(Request $request)
+    public function issues_metric_year(Request $request, $department_id)
     {
         // $monthYear = $request->input('monthYear');
         $year = $request->input('year');
 
 
-        $issuesByYear = Task::whereYear('created_at', $year)
+        $issuesByYear = Task::where('department_id', $department_id)->whereYear('created_at', $year)
             ->select(DB::raw('DATE(created_at) as month'), DB::raw('count(*) as total'))
             ->groupBy(DB::raw('DATE(created_at)'))
             ->get();
@@ -531,14 +531,75 @@ class TaskController extends Controller
     }
 
 
-    public function issues_most_reported(Request $request)
+    public function issues_most_reported_weekly(Request $request, $department_id)
     {
 
 
         $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
         $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
-        $mostReportedIssues = Task::whereBetween('schedule', [$startDate, $endDate])
+        $mostReportedIssues = Task::where('department_id', $department_id)->whereBetween('created_at', [$startDate, $endDate])
+            ->select('issue', DB::raw('count(*) as total'))
+            ->groupBy('issue')
+            ->orderByDesc('total')
+            ->limit(50) // You can adjust this limit as needed
+            ->get();
+
+        foreach ($mostReportedIssues as $issue) {
+            $issue->issue;
+        }
+
+        return $mostReportedIssues;
+    }
+
+    public function issues_most_reported_monthly(Request $request, $department_id)
+    {
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        $mostReportedIssues = Task::where('department_id', $department_id)->whereMonth('created_at', Carbon::now()->month)
+            ->select('issue', DB::raw('count(*) as total'))
+            ->groupBy('issue')
+            ->orderByDesc('total')
+            ->limit(50) // You can adjust this limit as needed
+            ->get();
+
+        foreach ($mostReportedIssues as $issue) {
+            $issue->issue;
+        }
+
+        return $mostReportedIssues;
+    }
+
+    public function issues_most_reported_yearly(Request $request, $department_id)
+    {
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        $mostReportedIssues = Task::where('department_id', $department_id)->whereYear('created_at', Carbon::now()->year)
+            ->select('issue', DB::raw('count(*) as total'))
+            ->groupBy('issue')
+            ->orderByDesc('total')
+            ->limit(50) // You can adjust this limit as needed
+            ->get();
+
+        foreach ($mostReportedIssues as $issue) {
+            $issue->issue;
+        }
+
+        return $mostReportedIssues;
+    }
+
+    public function issues_most_reported_daily(Request $request, $department_id)
+    {
+
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        $mostReportedIssues = Task::where('department_id', $department_id)->whereDate('created_at', Carbon::today())
             ->select('issue', DB::raw('count(*) as total'))
             ->groupBy('issue')
             ->orderByDesc('total')

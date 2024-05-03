@@ -108,12 +108,15 @@ Route::delete('notifications/{id}', [NotificationController::class, "destroy"]);
 Route::post('device_tokens', [DeviceTokenController::class, "store"]);
 Route::delete('device_tokens', [DeviceTokenController::class, "destroy"]);
 
-Route::get('issues_metric/week', [TaskController::class, "issues_metric_week"]);
-Route::post('issues_metric/month', [TaskController::class, "issues_metric_month"]);
-Route::post('issues_metric/year', [TaskController::class, "issues_metric_year"]);
+Route::get('issues_metric/week/{department_id}', [TaskController::class, "issues_metric_week"]);
+Route::post('issues_metric/month/{department_id}', [TaskController::class, "issues_metric_month"]);
+Route::post('issues_metric/year/{department_id}', [TaskController::class, "issues_metric_year"]);
 
 
-Route::get('issues_most_reported', [TaskController::class, "issues_most_reported"]);
+Route::get('issues_most_reported/daily/{department_id}', [TaskController::class, "issues_most_reported_daily"]);
+Route::get('issues_most_reported/week/{department_id}', [TaskController::class, "issues_most_reported_weekly"]);
+Route::get('issues_most_reported/month/{department_id}', [TaskController::class, "issues_most_reported_monthly"]);
+Route::get('issues_most_reported/year/{department_id}', [TaskController::class, "issues_most_reported_yearly"]);
 Route::post('tasks_metric/{department_id}/{day}', [TaskController::class, "tasks_metric"]);
 
 Route::post('projects_metric/{department_id}/{day}', [ProjectController::class, "projects_metric"]);
