@@ -152,9 +152,9 @@ class UserController extends Controller
         $department = $res->position->department;
 
 
-        //TODO: FILTERED BY PRIORITY & NEAREST SCHEDULE
-        $res2 = Task::where('department_id', $department->id)
-            ->where('d_status', 1)
+        $res2 = Task::
+            // where('department_id', $department->id)
+            where('d_status', 1)
             ->where('status', 0)
             ->where('schedule', null)
             ->where(function ($query) use ($user_id) {
@@ -196,6 +196,7 @@ class UserController extends Controller
 
 
         $res2 = Task::where('assignee_id', $user_id)
+            ->orWhere('requestor_id', $user_id)
             ->whereDate('schedule', '<=', Carbon::today())
             ->where('completed_marker_id', null)
             ->where('d_status', 1)
@@ -233,7 +234,9 @@ class UserController extends Controller
         $department = $res->department;
 
         $res2 = Task::where('assignee_id', $user_id)
+
             ->whereDate('schedule', '>', Carbon::today())
+            ->orWhere('requestor_id', $user_id)
             ->where('completed_marker_id', null)
             ->where('d_status', 1)
             ->get()
@@ -290,7 +293,9 @@ class UserController extends Controller
 
         $today = $request->today ?? false;
         $tmp = Task::where('assignee_id', $id)
+            ->orWhere('requestor_id', $id)
             // ->whereDate('schedule', '>', Carbon::today())
+            ->where('status', 4)
             ->where('completed_marker_id', '!=', null)
             ->where('d_status', 1);
 
@@ -330,6 +335,7 @@ class UserController extends Controller
 
         $today = $request->today ?? false;
         $tmp = Task::where('assignee_id', $id)
+            ->orWhere('requestor_id', $id)
             ->where('status', 3)
             ->where('d_status', 1)
             ->orderBy('updated_at', 'desc');
