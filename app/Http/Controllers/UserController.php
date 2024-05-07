@@ -152,16 +152,13 @@ class UserController extends Controller
         $department = $res->position->department;
 
 
-        $res2 = Task::
-            // where('department_id', $department->id)
-            where('d_status', 1)
-            ->where('status', 0)
+
+        $res2 = Task::where('department_id', $department->id)
             ->where('schedule', null)
-            ->where(function ($query) use ($user_id) {
-                $query->where('requestor_id', $user_id);
-            })
-            ->get()
-            ->values();
+            ->where('assignee_id', null)
+            ->where('completed_marker_id', null)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
 
 
@@ -186,6 +183,74 @@ class UserController extends Controller
         ];
     }
 
+    public function user_raised_issues(Request $request, $user_id)
+    {
+
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
+
+        $res = User::get()->where('id', $user_id)->first();
+
+        $department = $res->position->department;
+
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        $res2 = Task::where('department_id', '!=', $department->id)
+            ->where('d_status', 1)
+            ->where(function ($query) use ($user_id) {
+                $query->where('requestor_id', $user_id);
+            });
+
+
+
+        if (!$res2 || !$res2->count()) {
+            return response()->json([
+                "data" => [],
+                "success" => false,
+                "message" => "No assigned tasks found."
+            ], 404);
+        }
+
+
+        if ($filterBy == 'daily') {
+            $res2 = $res2->whereDate('created_at', Carbon::today())->orderBy('created_at', 'desc')->get();
+        }
+        if ($filterBy == 'weekly') {
+            $res2 = $res2->whereBetween('created_at', [$startDate, $endDate])->orderBy('created_at', 'desc')->get();
+        }
+        if ($filterBy == 'month' && $month && $year) {
+            $res2 = $res2->whereMonth('created_at', Carbon::parse($month))->whereYear('created_at', $year)->orderBy('created_at', 'desc')->get();
+        }
+        if ($filterBy == 'year' && $year) {
+            $res2 = $res2->whereYear('created_at', $year)->orderBy('created_at', 'desc')->get();
+        }
+        if ($filterBy == 'custom' && $custom) {
+            $res2 = $res2->whereDate('created_at', Carbon::parse($custom)->format('Y-m-d'))->get();
+        }
+
+
+        $groupedTasks = $res2->groupBy(function ($task) {
+            return $task->created_at->format('Y-m-d'); // Grouping tasks by date
+        });
+
+        $groupedTasks->transform(function ($tasks) {
+            foreach ($tasks as $task) {
+                // Load related models if needed
+                $task->load('assignee', 'requestor');
+            }
+            return $tasks;
+        });
+
+        return [
+            "data" => $groupedTasks,
+            "success" => true,
+        ];
+    }
+
 
     public function user_ongoing_tasks($user_id)
     {
@@ -196,7 +261,6 @@ class UserController extends Controller
 
 
         $res2 = Task::where('assignee_id', $user_id)
-            ->orWhere('requestor_id', $user_id)
             ->whereDate('schedule', '<=', Carbon::today())
             ->where('completed_marker_id', null)
             ->where('d_status', 1)
@@ -234,9 +298,7 @@ class UserController extends Controller
         $department = $res->department;
 
         $res2 = Task::where('assignee_id', $user_id)
-
             ->whereDate('schedule', '>', Carbon::today())
-            ->orWhere('requestor_id', $user_id)
             ->where('completed_marker_id', null)
             ->where('d_status', 1)
             ->get()
@@ -291,23 +353,45 @@ class UserController extends Controller
     public function user_done_tasks(Request $request, $id)
     {
 
-        $today = $request->today ?? false;
-        $tmp = Task::where('assignee_id', $id)
-            ->orWhere('requestor_id', $id)
+
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
+
+        $res2 = Task::where('assignee_id', $id)
             // ->whereDate('schedule', '>', Carbon::today())
-            ->where('status', 4)
             ->where('completed_marker_id', '!=', null)
             ->where('d_status', 1);
 
 
-        if ($today) {
+        // if ($today) {
 
-            $tmp = $tmp->whereDate('updated_at', Carbon::today());
+        //     $tmp = $tmp->whereDate('updated_at', Carbon::today());
+        // }
+
+        // $res2 = $tmp->get()
+        //     ->values();
+
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        if ($filterBy == 'daily') {
+            $res2 = $res2->whereDate('updated_at', Carbon::today())->orderBy('updated_at', 'desc')->get();
         }
-
-        $res2 = $tmp->get()
-            ->values();
-
+        if ($filterBy == 'weekly') {
+            $res2 = $res2->whereBetween('updated_at', [$startDate, $endDate])->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'month' && $month && $year) {
+            $res2 = $res2->whereMonth('updated_at', Carbon::parse($month))->whereYear('updated_at', $year)->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'year' && $year) {
+            $res2 = $res2->whereYear('updated_at', $year)->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'custom' && $custom) {
+            $res2 = $res2->whereDate('updated_at', Carbon::parse($custom)->format('Y-m-d'))->get();
+        }
 
 
         if (!$res2 || !$res2->count()) {
@@ -335,7 +419,6 @@ class UserController extends Controller
 
         $today = $request->today ?? false;
         $tmp = Task::where('assignee_id', $id)
-            ->orWhere('requestor_id', $id)
             ->where('status', 3)
             ->where('d_status', 1)
             ->orderBy('updated_at', 'desc');

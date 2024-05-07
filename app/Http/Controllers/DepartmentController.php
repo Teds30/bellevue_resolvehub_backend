@@ -305,21 +305,44 @@ class DepartmentController extends Controller
     public function department_done_tasks(Request $request, $id,)
     {
 
-        $today = $request->input('today', false);
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
 
-        $tmp = Task::where('department_id', $id)
+        $res2 = Task::where('department_id', $id)
             // ->whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', '!=', null)
             ->where('status', 4)
             ->where('d_status', 1)
             ->orderBy('updated_at', 'desc');
 
-        if ($today) {
-            $tmp = $tmp->whereDate('updated_at', Carbon::today());
-        }
 
-        $res2 = $tmp->get()
-            ->values();
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        if ($filterBy == 'daily') {
+            $res2 = $res2->whereDate('updated_at', Carbon::today())->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'weekly') {
+            $res2 = $res2->whereBetween('updated_at', [$startDate, $endDate])->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'month' && $month && $year) {
+            $res2 = $res2->whereMonth('updated_at', Carbon::parse($month))->whereYear('updated_at', $year)->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'year' && $year) {
+            $res2 = $res2->whereYear('updated_at', $year)->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'custom' && $custom) {
+            $res2 = $res2->whereDate('updated_at', Carbon::parse($custom)->format('Y-m-d'))->get();
+        }
+        // if ($today) {
+        //     $tmp = $tmp->whereDate('updated_at', Carbon::today());
+        // }
+
+        // $res2 = $tmp->get()
+        //     ->values();
 
 
         if (!$res2 || !$res2->count()) {
@@ -345,20 +368,44 @@ class DepartmentController extends Controller
     public function department_cancelled_tasks(Request $request, $id)
     {
 
-        $today = $request->today ?? false;
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
 
-        $tmp = Task::where('department_id', $id)
+
+        $res2 = Task::where('department_id', $id)
             // ->whereDate('schedule', '>', Carbon::today())
             ->where('status', 3)
             ->where('d_status', 1)
             ->orderBy('updated_at', 'desc');
 
-        if ($today) {
-            $tmp = $tmp->whereDate('updated_at', Carbon::today());
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        if ($filterBy == 'daily') {
+            $res2 = $res2->whereDate('updated_at', Carbon::today())->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'weekly') {
+            $res2 = $res2->whereBetween('updated_at', [$startDate, $endDate])->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'month' && $month && $year) {
+            $res2 = $res2->whereMonth('updated_at', Carbon::parse($month))->whereYear('updated_at', $year)->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'year' && $year) {
+            $res2 = $res2->whereYear('updated_at', $year)->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'custom' && $custom) {
+            $res2 = $res2->whereDate('updated_at', Carbon::parse($custom)->format('Y-m-d'))->get();
         }
 
-        $res2 = $tmp->get()
-            ->values();
+        // if ($today) {
+        //     $tmp = $tmp->whereDate('updated_at', Carbon::today());
+        // }
+
+        // $res2 = $tmp->get()
+        //     ->values();
 
 
         if (!$res2 || !$res2->count()) {
