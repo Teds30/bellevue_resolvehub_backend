@@ -62,7 +62,7 @@ class AuthController extends Controller
             'password' => 'required|string'
         ]);
 
-        $user = User::where('username', $fields['username'])->first();
+        $user = User::where('username', $fields['username'])->where('d_status', 1)->first();
 
         if (!$user || !Hash::check($fields['password'], $user->password)) {
             // return response([
