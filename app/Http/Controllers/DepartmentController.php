@@ -11,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DepartmentController extends Controller
 {
@@ -454,5 +455,19 @@ class DepartmentController extends Controller
             "data" => $groupedTasks,
             "success" => true,
         ];
+    }
+
+    public function top_employees(Request $request, $department_id)
+    {
+        $topAssignees = Task::select('assignee_id', DB::raw('COUNT(*) as completed_tasks'))
+            ->with('assignee')
+            ->where('status', 4)
+            ->where('department_id', $department_id)
+            ->groupBy('assignee_id')
+            ->orderByDesc('completed_tasks')
+            ->limit(50)
+            ->get();
+
+        return $topAssignees;
     }
 }

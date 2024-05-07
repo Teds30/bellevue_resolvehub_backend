@@ -264,6 +264,7 @@ class UserController extends Controller
             ->whereDate('schedule', '<=', Carbon::today())
             ->where('completed_marker_id', null)
             ->where('d_status', 1)
+            ->orderBy('created_at', 'desc')
             ->get()
             ->values();
 
