@@ -240,7 +240,7 @@ class UserController extends Controller
         $groupedTasks->transform(function ($tasks) {
             foreach ($tasks as $task) {
                 // Load related models if needed
-                $task->load('assignee', 'requestor');
+                $task->load('assignee', 'requestor', 'department');
             }
             return $tasks;
         });
@@ -362,7 +362,8 @@ class UserController extends Controller
         $res2 = Task::where('assignee_id', $id)
             // ->whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', '!=', null)
-            ->where('d_status', 1);
+            ->where('d_status', 1)
+            ->where('status', 4);
 
 
         // if ($today) {
@@ -403,34 +404,70 @@ class UserController extends Controller
         }
 
 
-        foreach ($res2 as $task) {
-            $task->issue;
-            $task->assignee;
-            $task->requestor;
-        }
+
+        $groupedTasks = $res2->groupBy(function ($task) {
+            return $task->updated_at->format('Y-m-d'); // Grouping tasks by date
+        });
+
+
+        $groupedTasks->transform(function ($tasks) {
+            foreach ($tasks as $task) {
+                // Load related models if needed
+                $task->load('assignee', 'requestor');
+            }
+            return $tasks;
+        });
+
+        // foreach ($res2 as $task) {
+        //     $task->issue;
+        //     $task->assignee;
+        //     $task->requestor;
+        // }
 
         return [
-            "data" => $res2,
+            "data" => $groupedTasks,
             "success" => true,
         ];
     }
     public function user_cancelled_tasks(Request $request, $id)
     {
 
-        $today = $request->today ?? false;
-        $tmp = Task::where('assignee_id', $id)
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
+
+        $res2 = Task::where('assignee_id', $id)
             ->where('status', 3)
             ->where('d_status', 1)
             ->orderBy('updated_at', 'desc');
 
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
-        if ($today) {
-
-            $tmp = $tmp->whereDate('updated_at', Carbon::today());
+        if ($filterBy == 'daily') {
+            $res2 = $res2->whereDate('updated_at', Carbon::today())->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'weekly') {
+            $res2 = $res2->whereBetween('updated_at', [$startDate, $endDate])->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'month' && $month && $year) {
+            $res2 = $res2->whereMonth('updated_at', Carbon::parse($month))->whereYear('updated_at', $year)->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'year' && $year) {
+            $res2 = $res2->whereYear('updated_at', $year)->orderBy('updated_at', 'desc')->get();
+        }
+        if ($filterBy == 'custom' && $custom) {
+            $res2 = $res2->whereDate('updated_at', Carbon::parse($custom)->format('Y-m-d'))->get();
         }
 
-        $res2 = $tmp->get()
-            ->values();
+        // if ($today) {
+
+        //     $tmp = $tmp->whereDate('updated_at', Carbon::today());
+        // }
+
+        // $res2 = $tmp->get()
+        //     ->values();
 
 
 
@@ -443,14 +480,28 @@ class UserController extends Controller
         }
 
 
-        foreach ($res2 as $task) {
-            $task->issue;
-            $task->assignee;
-            $task->requestor;
-        }
+        $groupedTasks = $res2->groupBy(function ($task) {
+            return $task->updated_at->format('Y-m-d'); // Grouping tasks by date
+        });
+
+
+        $groupedTasks->transform(function ($tasks) {
+            foreach ($tasks as $task) {
+                // Load related models if needed
+                $task->load('assignee', 'requestor');
+            }
+            return $tasks;
+        });
+
+
+        // foreach ($res2 as $task) {
+        //     $task->issue;
+        //     $task->assignee;
+        //     $task->requestor;
+        // }
 
         return [
-            "data" => $res2,
+            "data" => $groupedTasks,
             "success" => true,
         ];
     }

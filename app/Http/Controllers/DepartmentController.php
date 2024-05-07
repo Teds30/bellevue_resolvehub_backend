@@ -353,14 +353,28 @@ class DepartmentController extends Controller
             ], 404);
         }
 
-        foreach ($res2 as $task) {
-            $task->requestor;
-            $task->assignee;
-            // $task->issue;
-        }
+
+        $groupedTasks = $res2->groupBy(function ($task) {
+            return $task->updated_at->format('Y-m-d'); // Grouping tasks by date
+        });
+
+
+        $groupedTasks->transform(function ($tasks) {
+            foreach ($tasks as $task) {
+                // Load related models if needed
+                $task->load('assignee', 'requestor');
+            }
+            return $tasks;
+        });
+
+        // foreach ($res2 as $task) {
+        //     $task->requestor;
+        //     $task->assignee;
+        //     // $task->issue;
+        // }
 
         return [
-            "data" => $res2,
+            "data" => $groupedTasks,
             "success" => true,
         ];
     }
