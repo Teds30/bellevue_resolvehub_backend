@@ -461,9 +461,12 @@ class DepartmentController extends Controller
     {
         $topAssignees = Task::select('assignee_id', DB::raw('COUNT(*) as completed_tasks'))
             ->with('assignee')
-            ->where('status', 4)
-            ->where('department_id', $department_id)
-            ->groupBy('assignee_id')
+            ->where('status', 4);
+
+
+        if ($department_id != 10000) $topAssignees = $topAssignees->where('department_id', $department_id);
+
+        $topAssignees = $topAssignees->groupBy('assignee_id')
             ->orderByDesc('completed_tasks')
             ->limit(50)
             ->get();
