@@ -64,13 +64,28 @@ class TaskController extends Controller
         $status = $request->input('status', null);
         $searchField = $request->input('searchField', null);
         $search = $request->input('search', null);
+        $can_see_all = $request->input('can_see_all', null);
 
 
         // $tasks = Task::where('d_status', 1)->with('issue')->with('department')->with('assignee')->with('requestor')->with('assignor');
-        $tasks = Task::where('d_status', 1)->where('department_id', $departmentId)->with('department')->with('assignee')->with('requestor')->with('assignor');
+        $tasks = Task::where('d_status', 1)->with('assignee')->with('requestor')->with('assignor')->with('department');
 
-        if ($searchField && $search) {
+        if ($can_see_all == false) {
+            $tasks = $tasks->where('department_id', $departmentId);
+        }
+        if ($searchField && $search && $searchField != 'Assignee' &&  $searchField != 'Department') {
             $tasks = $tasks->where($searchField, 'like', "%$search%");
+        }
+        if ($searchField && $search && $searchField == 'Assignee') {
+            $searched_users = User::where('first_name', 'like', "%$search%")->orWhere('last_name', 'like', "%$search%")->pluck('id')
+                ->toArray();
+            $tasks = $tasks->whereIn('assignee_id', $searched_users);
+        }
+
+        if ($searchField && $search && $searchField == 'Department') {
+            $searched_departments = Department::where('name', 'like', "%$search%")->pluck('id')
+                ->toArray();
+            $tasks = $tasks->whereIn('department_id', $searched_departments);
         }
         if ($filterBy == 'daily') {
             $tasks = $tasks->whereDate('created_at', Carbon::today());
