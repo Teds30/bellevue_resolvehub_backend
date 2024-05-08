@@ -9,6 +9,7 @@ use App\Models\Issue;
 use App\Models\Notification;
 use App\Models\Position;
 use App\Models\User;
+use App\Models\Department;
 use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -361,11 +362,17 @@ class TaskController extends Controller
         $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
         $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
-        $issuesBySchedule = Task::where('department_id', $department_id)->whereBetween('created_at', [$startDate, $endDate])
-            ->select(DB::raw('DATE(created_at) as day'), DB::raw('count(*) as total'))
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->get();
-
+        if ($department_id != 10000) {
+            $issuesBySchedule = Task::where('department_id', $department_id)->whereBetween('created_at', [$startDate, $endDate])
+                ->select(DB::raw('DATE(created_at) as day'), DB::raw('count(*) as total'))
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get();
+        } else {
+            $issuesBySchedule = Task::whereBetween('created_at', [$startDate, $endDate])
+                ->select(DB::raw('DATE(created_at) as day'), DB::raw('count(*) as total'))
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get();
+        }
 
         $formattedData = [];
         $daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -411,11 +418,18 @@ class TaskController extends Controller
         $startDate = Carbon::createFromFormat('Y-m', $year . '-' . $month)->startOfMonth()->toDateString();
         $endDate = Carbon::createFromFormat('Y-m', $year . '-' . $month)->endOfMonth()->toDateString();
 
-        // Retrieve data for the current month
-        $issuesBySchedule = Task::where('department_id', $department_id)->whereMonth('created_at', $month)->whereYear('created_at', $year)
-            ->select(DB::raw('DATE(created_at) as day'), DB::raw('count(*) as total'))
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->get();
+        if ($department_id != 10000) {
+
+            $issuesBySchedule = Task::where('department_id', $department_id)->whereMonth('created_at', $month)->whereYear('created_at', $year)
+                ->select(DB::raw('DATE(created_at) as day'), DB::raw('count(*) as total'))
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get();
+        } else {
+            $issuesBySchedule = Task::whereMonth('created_at', $month)->whereYear('created_at', $year)
+                ->select(DB::raw('DATE(created_at) as day'), DB::raw('count(*) as total'))
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get();
+        }
 
         $formattedData = [];
         $daysOfMonth = [];
@@ -464,11 +478,19 @@ class TaskController extends Controller
         $year = $request->input('year');
 
 
-        $issuesByYear = Task::where('department_id', $department_id)->whereYear('created_at', $year)
-            ->select(DB::raw('DATE(created_at) as month'), DB::raw('count(*) as total'))
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->get();
+        if ($department_id != 10000) {
 
+            $issuesByYear = Task::where('department_id', $department_id)->whereYear('created_at', $year)
+                ->select(DB::raw('DATE(created_at) as month'), DB::raw('count(*) as total'))
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get();
+        } else {
+
+            $issuesByYear = Task::whereYear('created_at', $year)
+                ->select(DB::raw('DATE(created_at) as month'), DB::raw('count(*) as total'))
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get();
+        }
         // return $issuesByYear;
 
         $monthsLabel = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -538,12 +560,21 @@ class TaskController extends Controller
         $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
         $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
-        $mostReportedIssues = Task::where('department_id', $department_id)->whereBetween('created_at', [$startDate, $endDate])
-            ->select('issue', DB::raw('count(*) as total'))
-            ->groupBy('issue')
-            ->orderByDesc('total')
-            ->limit(50) // You can adjust this limit as needed
-            ->get();
+        if ($department_id != 10000) {
+            $mostReportedIssues = Task::where('department_id', $department_id)->whereBetween('created_at', [$startDate, $endDate])
+                ->select('issue', DB::raw('count(*) as total'))
+                ->groupBy('issue')
+                ->orderByDesc('total')
+                ->limit(50) // You can adjust this limit as needed
+                ->get();
+        } else {
+            $mostReportedIssues = Task::whereBetween('created_at', [$startDate, $endDate])
+                ->select('issue', DB::raw('count(*) as total'))
+                ->groupBy('issue')
+                ->orderByDesc('total')
+                ->limit(50) // You can adjust this limit as needed
+                ->get();
+        }
 
         foreach ($mostReportedIssues as $issue) {
             $issue->issue;
@@ -562,12 +593,22 @@ class TaskController extends Controller
         $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
         $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
-        $mostReportedIssues = Task::where('department_id', $department_id)->whereMonth('created_at', $month + 1)->whereYear('created_at', $year)
-            ->select('issue', DB::raw('count(*) as total'))
-            ->groupBy('issue')
-            ->orderByDesc('total')
-            ->limit(50) // You can adjust this limit as needed
-            ->get();
+        if ($department_id != 10000) {
+            $mostReportedIssues = Task::where('department_id', $department_id)->whereMonth('created_at', $month + 1)->whereYear('created_at', $year)
+                ->select('issue', DB::raw('count(*) as total'))
+                ->groupBy('issue')
+                ->orderByDesc('total')
+                ->limit(50) // You can adjust this limit as needed
+                ->get();
+        } else {
+
+            $mostReportedIssues = Task::whereMonth('created_at', $month + 1)->whereYear('created_at', $year)
+                ->select('issue', DB::raw('count(*) as total'))
+                ->groupBy('issue')
+                ->orderByDesc('total')
+                ->limit(50) // You can adjust this limit as needed
+                ->get();
+        }
 
         return $mostReportedIssues;
     }
@@ -580,12 +621,22 @@ class TaskController extends Controller
         $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
         $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
-        $mostReportedIssues = Task::where('department_id', $department_id)->whereYear('created_at', $year)
-            ->select('issue', DB::raw('count(*) as total'))
-            ->groupBy('issue')
-            ->orderByDesc('total')
-            ->limit(50) // You can adjust this limit as needed
-            ->get();
+        if ($department_id != 10000) {
+
+            $mostReportedIssues = Task::where('department_id', $department_id)->whereYear('created_at', $year)
+                ->select('issue', DB::raw('count(*) as total'))
+                ->groupBy('issue')
+                ->orderByDesc('total')
+                ->limit(50) // You can adjust this limit as needed
+                ->get();
+        } else {
+            $mostReportedIssues = Task::whereYear('created_at', $year)
+                ->select('issue', DB::raw('count(*) as total'))
+                ->groupBy('issue')
+                ->orderByDesc('total')
+                ->limit(50) // You can adjust this limit as needed
+                ->get();
+        }
 
         foreach ($mostReportedIssues as $issue) {
             $issue->issue;
@@ -601,12 +652,23 @@ class TaskController extends Controller
         $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
         $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
-        $mostReportedIssues = Task::where('department_id', $department_id)->whereDate('created_at', Carbon::today())
-            ->select('issue', DB::raw('count(*) as total'))
-            ->groupBy('issue')
-            ->orderByDesc('total')
-            ->limit(50) // You can adjust this limit as needed
-            ->get();
+        if ($department_id != 10000) {
+
+            $mostReportedIssues = Task::where('department_id', $department_id)->whereDate('created_at', Carbon::today())
+                ->select('issue', DB::raw('count(*) as total'))
+                ->groupBy('issue')
+                ->orderByDesc('total')
+                ->limit(50) // You can adjust this limit as needed
+                ->get();
+        } else {
+
+            $mostReportedIssues = Task::whereDate('created_at', Carbon::today())
+                ->select('issue', DB::raw('count(*) as total'))
+                ->groupBy('issue')
+                ->orderByDesc('total')
+                ->limit(50) // You can adjust this limit as needed
+                ->get();
+        }
 
         foreach ($mostReportedIssues as $issue) {
             $issue->issue;
@@ -632,26 +694,29 @@ class TaskController extends Controller
 
 
         $unassigned = Task::where('assignee_id', null)
-            ->where('status', 0)
-            ->where('department_id', $department_id);
+            ->where('status', 0);
+        if ($department_id != 10000) $unassigned = $unassigned->where('department_id', $department_id);
 
-        $pending = Task::where('department_id', $department_id)
-            ->whereDate('schedule', '>', Carbon::today())
+        $pending = Task::whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', null)
             ->where('d_status', 1);
+        if ($department_id != 10000) $pending = $pending->where('department_id', $department_id);
+
 
         $onGoing = Task::whereDate('schedule', '<=', Carbon::today())
-            ->where('department_id', $department_id)
             ->where('completed_marker_id', null)
             ->where('d_status', 1)
             ->where('status', '!=', 3);
+        if ($department_id != 10000) $onGoing = $onGoing->where('department_id', $department_id);
 
-        $cancelled = Task::where('status', 3)->where('department_id', $department_id);
+
+        $cancelled = Task::where('status', 3);
+        if ($department_id != 10000) $cancelled = $cancelled->where('department_id', $department_id);
 
         $done = Task::where('status', 4)
             ->where('completed_marker_id', '!=', null)
-            ->where('d_status', 1)
-            ->where('department_id', $department_id);
+            ->where('d_status', 1);
+        if ($department_id != 10000) $done = $done->where('department_id', $department_id);
 
         // $total = Task::where('d_status', 1)->where('department_id', $department_id);
         // Task::whereBetween('schedule', [$startDate, $endDate])
@@ -702,5 +767,110 @@ class TaskController extends Controller
         $totals = array_sum($totals);
 
         return ["unassigned" => $unassigned->count(), "pending" => $pending->count(), "ongoing" => $onGoing->count(), "cancelled" => $cancelled->count(), "done" => $done->count(), "total" => $totals];
+    }
+
+    public function tasks_metric_distribution(Request $request, $day)
+    {
+
+        $month = $request->input('month') + 1;
+        $year = $request->input('year');
+
+        $unassigned = null;
+        $pending = null;
+        $onGoing = null;
+        $cancelled = null;
+        $done = null;
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        $departments_list = Department::where('d_status', 1)->get();
+
+        $out = [];
+
+        foreach ($departments_list as $department) {
+            $department_id = $department->id;
+
+            $unassigned = Task::where('assignee_id', null)
+                ->where('status', 0);
+            if ($department_id != 10000) $unassigned = $unassigned->where('department_id', $department_id);
+
+            $pending = Task::whereDate('schedule', '>', Carbon::today())
+                ->where('completed_marker_id', null)
+                ->where('d_status', 1);
+            if ($department_id != 10000) $pending = $pending->where('department_id', $department_id);
+
+
+            $onGoing = Task::whereDate('schedule', '<=', Carbon::today())
+                ->where('completed_marker_id', null)
+                ->where('d_status', 1)
+                ->where('status', '!=', 3);
+            if ($department_id != 10000) $onGoing = $onGoing->where('department_id', $department_id);
+
+
+            $cancelled = Task::where('status', 3);
+            if ($department_id != 10000) $cancelled = $cancelled->where('department_id', $department_id);
+
+            $done = Task::where('status', 4)
+                ->where('completed_marker_id', '!=', null)
+                ->where('d_status', 1);
+            if ($department_id != 10000) $done = $done->where('department_id', $department_id);
+
+            // $total = Task::where('d_status', 1)->where('department_id', $department_id);
+            // Task::whereBetween('schedule', [$startDate, $endDate])
+
+            switch ($day) {
+                case 'daily':
+                    $unassigned = $unassigned->whereDate('created_at', Carbon::now());
+                    $pending = $pending->whereDate('created_at', Carbon::now());
+                    $onGoing = $onGoing->whereDate('updated_at', Carbon::now());
+                    $cancelled = $cancelled->whereDate('updated_at', Carbon::now());
+                    $done = $done->whereDate('updated_at', Carbon::now());
+                    // ->count();
+                    break;
+                case 'weekly':
+                    $unassigned = $unassigned->whereBetween('created_at', [$startDate, $endDate]);
+                    $pending = $pending->whereBetween('created_at', [$startDate, $endDate]);
+                    $onGoing = $onGoing->whereBetween('updated_at', [$startDate, $endDate]);
+                    $cancelled = $cancelled->whereBetween('updated_at', [$startDate, $endDate]);
+                    $done = $done->whereBetween('updated_at', [$startDate, $endDate]);
+                    // ->count();
+                    break;
+                case 'monthly':
+                    $unassigned = $unassigned->whereMonth('created_at', $month);
+                    $pending = $pending->whereMonth('created_at', $month);
+                    $onGoing = $onGoing->whereMonth('updated_at', $month);
+                    $cancelled = $cancelled->whereMonth('updated_at', $month);
+                    $done = $done->whereMonth('updated_at', $month);
+                    break;
+                case 'yearly':
+                    $unassigned = $unassigned->whereYear('created_at', $year);
+                    $pending = $pending->whereYear('created_at', $year);
+                    $onGoing = $onGoing->whereYear('updated_at', $year);
+                    $cancelled = $cancelled->whereYear('updated_at', $year);
+                    $done = $done->whereYear('updated_at', $year);
+                    break;
+            }
+
+
+
+            $totals = [
+                "unassigned" => $unassigned->count(),
+                "pending" => $pending->count(),
+                "ongoing" => $onGoing->count(),
+                "cancelled" => $cancelled->count(),
+                "done" => $done->count(),
+            ];
+
+            $totals = array_sum($totals);
+
+            $output[] = ["department" => $department, "unassigned" => $unassigned->count(), "pending" => $pending->count(), "ongoing" => $onGoing->count(), "cancelled" => $cancelled->count(), "done" => $done->count(), "total" => $totals];
+        }
+
+        usort($output, function ($a, $b) {
+            return $b['total'] - $a['total'];
+        });
+
+        return $output;
     }
 }

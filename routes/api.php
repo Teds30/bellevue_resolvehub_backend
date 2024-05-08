@@ -110,7 +110,6 @@ Route::post('device_tokens', [DeviceTokenController::class, "store"]);
 Route::delete('device_tokens', [DeviceTokenController::class, "destroy"]);
 
 Route::get('issues_metric/week/{department_id}', [TaskController::class, "issues_metric_week"]);
-Route::get('issues_metric/week/{department_id}', [TaskController::class, "issues_metric_week"]);
 Route::post('issues_metric/month/{department_id}', [TaskController::class, "issues_metric_month"]);
 Route::post('issues_metric/year/{department_id}', [TaskController::class, "issues_metric_year"]);
 
@@ -120,6 +119,8 @@ Route::get('issues_most_reported/week/{department_id}', [TaskController::class, 
 Route::post('issues_most_reported/month/{department_id}', [TaskController::class, "issues_most_reported_monthly"]);
 Route::post('issues_most_reported/year/{department_id}', [TaskController::class, "issues_most_reported_yearly"]);
 Route::post('tasks_metric/{department_id}/{day}', [TaskController::class, "tasks_metric"]);
+Route::post('tasks_metric_distribution/{day}', [TaskController::class, "tasks_metric_distribution"]);
+
 
 Route::post('projects_metric/{department_id}/{day}', [ProjectController::class, "projects_metric"]);
 
