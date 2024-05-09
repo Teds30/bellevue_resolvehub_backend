@@ -888,4 +888,18 @@ class TaskController extends Controller
 
         return $output;
     }
+
+    public function issues_recommendation()
+    {
+        $res = Task::select('id', 'issue as name')
+            ->distinct()       // Get distinct 'issue' values
+            ->orderBy('issue', 'asc') // Sort the 'issue' values in ascending order
+            ->get();
+
+        return [
+            "data" => $res,
+            "success" => true,
+            "message" => null
+        ];
+    }
 }

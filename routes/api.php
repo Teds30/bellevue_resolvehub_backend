@@ -59,6 +59,7 @@ Route::post('issues', [IssueController::class, "store"]);
 Route::patch('issues/{id}', [IssueController::class, "update"]);
 Route::delete('issues/{id}', [IssueController::class, "destroy"]);
 
+Route::get('issues_recommendation', [TaskController::class, "issues_recommendation"]);
 
 // Route::get('task_images', [IssueController::class, "index"]);
 // Route::get('task_images/{id}', [IssueController::class, "show"]);
