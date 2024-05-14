@@ -201,7 +201,7 @@ class ProjectController extends Controller
 
     public function user_projects($id)
     {
-        $res = Project::where('requestor_id', $id)->where('d_status', 1)->orderBy('updated_at', 'desc')->get();
+        $res = Project::where('requestor_id', $id)->where('incharge_id', '!=', $id)->where('d_status', 1)->orderBy('updated_at', 'desc')->get();
 
         if (!$res || !$res->count()) {
             return response()->json([

@@ -19,7 +19,7 @@ class ProjectCommentController extends Controller
 
     public function comments($project_id)
     {
-        $res = ProjectComment::get()->where('project_id', $project_id)->sortByDesc('created_at')->values();
+        $res = ProjectComment::where('project_id', $project_id)->orderBy('created_at', 'desc')->get();
 
         if (!$res || !$res->count()) {
             return response()->json([
