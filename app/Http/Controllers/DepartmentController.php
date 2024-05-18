@@ -459,12 +459,33 @@ class DepartmentController extends Controller
 
     public function top_employees(Request $request, $department_id)
     {
+
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
+
         $topAssignees = Task::select('assignee_id', DB::raw('COUNT(*) as completed_tasks'))
             ->with('assignee')
             ->where('status', 4);
 
-
         if ($department_id != 10000) $topAssignees = $topAssignees->where('department_id', $department_id);
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        if ($filterBy == 'daily') {
+            $topAssignees = $topAssignees->whereDate('updated_at', Carbon::today());
+        }
+        if ($filterBy == 'weekly') {
+            $topAssignees = $topAssignees->whereBetween('updated_at', [$startDate, $endDate]);
+        }
+        if ($filterBy == 'month' && $month && $year) {
+            $topAssignees = $topAssignees->whereMonth('updated_at', Carbon::parse($month))->whereYear('updated_at', $year);
+        }
+        if ($filterBy == 'year' && $year) {
+            $topAssignees = $topAssignees->whereYear('updated_at', $year);
+        }
 
         $topAssignees = $topAssignees->groupBy('assignee_id')
             ->orderByDesc('completed_tasks')
