@@ -120,7 +120,9 @@ Route::get('issues_most_reported/week/{department_id}', [TaskController::class, 
 Route::post('issues_most_reported/month/{department_id}', [TaskController::class, "issues_most_reported_monthly"]);
 Route::post('issues_most_reported/year/{department_id}', [TaskController::class, "issues_most_reported_yearly"]);
 Route::post('tasks_metric/{department_id}/{day}', [TaskController::class, "tasks_metric"]);
+
 Route::post('tasks_metric_distribution/{day}', [TaskController::class, "tasks_metric_distribution"]);
+Route::post('projects_metric_distribution/{day}', [ProjectController::class, "projects_metric_distribution"]);
 
 
 Route::post('projects_metric/{department_id}/{day}', [ProjectController::class, "projects_metric"]);
@@ -144,6 +146,7 @@ Route::get('department_done_tasks/{id}', [DepartmentController::class, "departme
 Route::get('department_cancelled_tasks/{id}', [DepartmentController::class, "department_cancelled_tasks"]);
 
 Route::get('top_employees/{department_id}', [DepartmentController::class, "top_employees"]);
+Route::get('top_departments', [DepartmentController::class, "top_departments"]);
 
 
 // Route::post('register', [AuthController::class, "register"]);
