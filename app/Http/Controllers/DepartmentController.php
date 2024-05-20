@@ -481,13 +481,50 @@ class DepartmentController extends Controller
             $topAssignees = $topAssignees->whereBetween('updated_at', [$startDate, $endDate]);
         }
         if ($filterBy == 'month' && $month && $year) {
-            $topAssignees = $topAssignees->whereMonth('updated_at', Carbon::parse($month))->whereYear('updated_at', $year);
+            $topAssignees = $topAssignees->whereMonth('updated_at', $month + 1)->whereYear('updated_at', $year);
         }
         if ($filterBy == 'year' && $year) {
             $topAssignees = $topAssignees->whereYear('updated_at', $year);
         }
 
         $topAssignees = $topAssignees->groupBy('assignee_id')
+            ->orderByDesc('completed_tasks')
+            ->limit(50)
+            ->get();
+
+        return $topAssignees;
+    }
+
+    public function top_departments(Request $request)
+    {
+
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
+
+        $topAssignees = Task::select('department_id', DB::raw('COUNT(*) as completed_tasks'))
+            ->with('department')
+            ->where('status', 4);
+
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        if ($filterBy == 'daily') {
+            $topAssignees = $topAssignees->whereDate('updated_at', Carbon::today());
+        }
+        if ($filterBy == 'weekly') {
+            $topAssignees = $topAssignees->whereBetween('updated_at', [$startDate, $endDate]);
+        }
+        if ($filterBy == 'month' && $month && $year) {
+            $topAssignees = $topAssignees->whereMonth('updated_at', $month + 1)->whereYear('updated_at', $year);
+        }
+        if ($filterBy == 'year' && $year) {
+            $topAssignees = $topAssignees->whereYear('updated_at', $year);
+        }
+
+        $topAssignees = $topAssignees->groupBy('department_id')
             ->orderByDesc('completed_tasks')
             ->limit(50)
             ->get();
