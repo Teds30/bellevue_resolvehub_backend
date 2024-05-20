@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
+use App\Models\Department;
 use App\Models\User;
 use App\Services\NotificationService;
 use Carbon\Carbon;
@@ -373,18 +374,37 @@ class ProjectController extends Controller
         $project = Project::where('department_id', $department_id);
 
 
-        $request = Project::where('department_id', $department_id)->where('status', 0);
-        $pending = Project::where('department_id', $department_id)->where('status', 1);
-        $onGoing = Project::where('department_id', $department_id)->where('status', 2);
-        $cancelled = Project::where('department_id', $department_id)->where('status', 3);
-        $done = Project::where('department_id', $department_id)->where('status', 4);
-        $rejected = Project::where('department_id', $department_id)->where('status', 5);
+        $requested = Project::where('status', 0)
+            ->where('d_status', 1);
+        if ($department_id != 10000) $requested = $requested->where('department_id', $department_id);
 
-        // return ['ps' => $request->get()];
+        $pending = Project::where('status', 1)
+            ->where('d_status', 1);
+        if ($department_id != 10000) $pending = $pending->where('department_id', $department_id);
+
+        $onGoing = Project::where('status', 2)
+            ->where('d_status', 1);
+        if ($department_id != 10000) $onGoing = $onGoing->where('department_id', $department_id);
+
+        $cancelled = Project::where('status', 3)
+            ->where('d_status', 1);
+        if ($department_id != 10000) $cancelled = $cancelled->where('department_id', $department_id);
+
+        $done = Project::where('status', 4)
+            ->where('d_status', 1);
+        if ($department_id != 10000) $done = $done->where('department_id', $department_id);
+
+        $rejected = Project::where('status', 5)
+            ->where('d_status', 1);
+        if ($department_id != 10000) $rejected = $rejected->where('department_id', $department_id);
+
+
+        // return ['ps' => $requested->get()];
 
         switch ($day) {
             case 'daily':
-                $request = $request->whereDate('created_at', Carbon::now());
+
+                $requested = $requested->whereDate('created_at', Carbon::now());
                 $pending = $pending->whereDate('created_at', Carbon::now());
                 $onGoing = $onGoing->whereDate('updated_at', Carbon::now());
                 $cancelled = $cancelled->whereDate('updated_at', Carbon::now());
@@ -393,7 +413,7 @@ class ProjectController extends Controller
                 // ->count();
                 break;
             case 'weekly':
-                $request = $request->whereBetween('created_at', [$startDate, $endDate]);
+                $requested = $requested->whereBetween('created_at', [$startDate, $endDate]);
                 $pending = $pending->whereBetween('created_at', [$startDate, $endDate]);
                 $onGoing = $onGoing->whereBetween('updated_at', [$startDate, $endDate]);
                 $cancelled = $cancelled->whereBetween('updated_at', [$startDate, $endDate]);
@@ -402,7 +422,7 @@ class ProjectController extends Controller
                 // ->count();
                 break;
             case 'monthly':
-                $request = $request->whereMonth('created_at', $month);
+                $requested = $requested->whereMonth('created_at', $month);
                 $pending = $pending->whereMonth('created_at', $month);
                 $onGoing = $onGoing->whereMonth('updated_at', $month);
                 $cancelled = $cancelled->whereMonth('updated_at', $month);
@@ -410,7 +430,7 @@ class ProjectController extends Controller
                 $rejected = $rejected->whereMonth('updated_at', $month);
                 break;
             case 'yearly':
-                $request = $request->whereYear('created_at', $year);
+                $requested = $requested->whereYear('created_at', $year);
                 $pending = $pending->whereYear('created_at', $year);
                 $onGoing = $onGoing->whereYear('updated_at', $year);
                 $cancelled = $cancelled->whereYear('updated_at', $year);
@@ -422,7 +442,7 @@ class ProjectController extends Controller
 
 
         $totals = [
-            "request" => $request->count(),
+            "requested" => $requested->count(),
             "pending" => $pending->count(),
             "ongoing" => $onGoing->count(),
             "cancelled" => $cancelled->count(),
@@ -432,6 +452,120 @@ class ProjectController extends Controller
 
         $totals = array_sum($totals);
 
-        return ["request" => $request->count(), "pending" => $pending->count(), "ongoing" => $onGoing->count(), "cancelled" => $cancelled->count(), "done" => $done->count(), "rejected" => $rejected->count(), "total" => $totals];
+        return ["requested" => $requested->count(), "pending" => $pending->count(), "ongoing" => $onGoing->count(), "cancelled" => $cancelled->count(), "done" => $done->count(), "rejected" => $rejected->count(), "total" => $totals];
+    }
+
+
+    public function projects_metric_distribution(Request $request, $day)
+    {
+
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        $requested = null;
+        $pending = null;
+        $onGoing = null;
+        $cancelled = null;
+        $done = null;
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        $departments_list = Department::where('d_status', 1)->get();
+
+        $out = [];
+
+        foreach ($departments_list as $department) {
+            $department_id = $department->id;
+
+            $requested = Project::where('status', 0)
+                ->where('d_status', 1);
+
+            if ($department_id != 10000) $requested = $requested->where('department_id', $department_id);
+
+            $pending = Project::where('status', 1)
+                ->where('d_status', 1);
+
+            if ($department_id != 10000) $pending = $pending->where('department_id', $department_id);
+
+
+            $onGoing = Project::where('status', 2)
+                ->where('d_status', 1);
+            if ($department_id != 10000) $onGoing = $onGoing->where('department_id', $department_id);
+
+
+            $cancelled = Project::where('status', 3)
+                ->where('d_status', 1);
+            if ($department_id != 10000) $cancelled = $cancelled->where('department_id', $department_id);
+
+            $done = Project::where('status', 4)
+                ->where('d_status', 1);
+            if ($department_id != 10000) $done = $done->where('department_id', $department_id);
+
+            $rejected = Project::where('status', 5)
+                ->where('d_status', 1);
+            if ($department_id != 10000) $rejected = $rejected->where('department_id', $department_id);
+
+            // $total = Task::where('d_status', 1)->where('department_id', $department_id);
+            // Task::whereBetween('schedule', [$startDate, $endDate])
+
+            switch ($day) {
+                case 'daily':
+                    $requested = $requested->whereDate('created_at', Carbon::now());
+                    $pending = $pending->whereDate('created_at', Carbon::now());
+                    $onGoing = $onGoing->whereDate('updated_at', Carbon::now());
+                    $cancelled = $cancelled->whereDate('updated_at', Carbon::now());
+                    $done = $done->whereDate('updated_at', Carbon::now());
+                    $rejected = $rejected->whereDate('updated_at', Carbon::now());
+                    // ->count();
+                    break;
+                case 'weekly':
+                    $requested = $requested->whereBetween('created_at', [$startDate, $endDate]);
+                    $pending = $pending->whereBetween('created_at', [$startDate, $endDate]);
+                    $onGoing = $onGoing->whereBetween('updated_at', [$startDate, $endDate]);
+                    $cancelled = $cancelled->whereBetween('updated_at', [$startDate, $endDate]);
+                    $done = $done->whereBetween('updated_at', [$startDate, $endDate]);
+                    $rejected = $rejected->whereBetween('updated_at', [$startDate, $endDate]);
+                    // ->count();
+                    break;
+                case 'monthly':
+                    $requested = $requested->whereMonth('created_at', $month);
+                    $pending = $pending->whereMonth('created_at', $month);
+                    $onGoing = $onGoing->whereMonth('updated_at', $month);
+                    $cancelled = $cancelled->whereMonth('updated_at', $month);
+                    $done = $done->whereMonth('updated_at', $month);
+                    $rejected = $rejected->whereMonth('updated_at', $month);
+                    break;
+                case 'yearly':
+                    $requested = $requested->whereYear('created_at', $year);
+                    $pending = $pending->whereYear('created_at', $year);
+                    $onGoing = $onGoing->whereYear('updated_at', $year);
+                    $cancelled = $cancelled->whereYear('updated_at', $year);
+                    $done = $done->whereYear('updated_at', $year);
+                    $rejected = $rejected->whereYear('updated_at', $year);
+                    break;
+            }
+
+
+
+            $totals = [
+                "requested" => $requested->count(),
+                "pending" => $pending->count(),
+                "ongoing" => $onGoing->count(),
+                "cancelled" => $cancelled->count(),
+                "done" => $done->count(),
+                "rejected" => $rejected->count(),
+            ];
+
+            $totals = array_sum($totals);
+
+            $output[] = ["department" => $department, "requested" => $requested->count(), "pending" => $pending->count(), "ongoing" => $onGoing->count(), "cancelled" => $cancelled->count(), "done" => $done->count(), "rejected" => $rejected->count(), "total" => $totals];
+        }
+
+        usort($output, function ($a, $b) {
+            return $b['total'] - $a['total'];
+        });
+
+        return $output;
     }
 }
