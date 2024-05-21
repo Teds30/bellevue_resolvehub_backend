@@ -1,5 +1,6 @@
 <?php
 
+use App\Exports\TasksExport;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DeviceTokenController;
@@ -148,5 +149,7 @@ Route::get('department_cancelled_tasks/{id}', [DepartmentController::class, "dep
 Route::get('top_employees/{department_id}', [DepartmentController::class, "top_employees"]);
 Route::get('top_departments', [DepartmentController::class, "top_departments"]);
 
+
+Route::post('tasks_export', [TaskController::class, "export"]);
 
 // Route::post('register', [AuthController::class, "register"]);

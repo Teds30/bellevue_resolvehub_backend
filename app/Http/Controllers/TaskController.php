@@ -14,6 +14,9 @@ use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Exports\TasksExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class TaskController extends Controller
 {
@@ -116,21 +119,31 @@ class TaskController extends Controller
             switch ($status) {
                 case 'request':
                     $_status = 0;
+                    $tasks = $tasks->unassigned();
+
                     break;
                 case 'active':
                     $_status = 1;
+                    $tasks = $tasks->onGoing();
+
                     break;
                 case 'pending':
                     $_status = 2;
+                    $tasks = $tasks->pending();
+
                     break;
                 case 'cancelled':
                     $_status = 3;
+                    $tasks = $tasks->cancelled();
+
                     break;
                 case 'accomplished':
+                    $tasks = $tasks->done();
+
                     $_status = 4;
                     break;
             }
-            $tasks = $tasks->where('status', $_status);
+            // $tasks = $tasks->where('status', $_status);
         }
 
         $tasks = $tasks
@@ -160,6 +173,110 @@ class TaskController extends Controller
             "success" => true,
             "message" => "Tasks fetched successfully."
         ], 200);
+    }
+
+    public function export(Request $request)
+    {
+
+        // return $request->input('page_size');
+        // Retrieve page size and page number from the request, with default values if not provided
+        $pageSize = $request->input('page_size', 10); // Default page size is 10
+        $page = $request->input('page', 0); // Default page is 1
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
+        $departmentId = $request->input('department_id', null);
+        $status = $request->input('status', null);
+        $searchField = $request->input('searchField', null);
+        $search = $request->input('search', null);
+        $can_see_all = $request->input('can_see_all', null);
+
+
+        // $tasks = Task::where('d_status', 1)->with('issue')->with('department')->with('assignee')->with('requestor')->with('assignor');
+        $tasks = Task::query()->where('d_status', 1)->with('assignee')->with('requestor')->with('assignor')->with('department');
+
+        if ($can_see_all == false) {
+            $tasks = $tasks->where('department_id', $departmentId);
+        }
+        if ($searchField && $search && $searchField != 'Assignee' &&  $searchField != 'Department') {
+            $tasks = $tasks->where($searchField, 'like', "%$search%");
+        }
+        if ($searchField && $search && $searchField == 'Assignee') {
+            $searched_users = User::where('first_name', 'like', "%$search%")->orWhere('last_name', 'like', "%$search%")->pluck('id')
+                ->toArray();
+            $tasks = $tasks->whereIn('assignee_id', $searched_users);
+        }
+
+        if ($searchField && $search && $searchField == 'Department') {
+            $searched_departments = Department::where('name', 'like', "%$search%")->pluck('id')
+                ->toArray();
+            $tasks = $tasks->whereIn('department_id', $searched_departments);
+        }
+        if ($filterBy == 'daily') {
+            $tasks = $tasks->whereDate('created_at', Carbon::today());
+        }
+        if ($filterBy == 'this_week') {
+
+            $startOfWeek = Carbon::now()->startOfWeek(); // Start of the week (Monday)
+            $endOfWeek = Carbon::now()->endOfWeek(); // End of the week (Sunday)
+            $tasks = $tasks->whereDate('created_at', [$startOfWeek, $endOfWeek]);
+        }
+        if ($filterBy == 'month' && $month && $year) {
+
+            $monthNumeric = Carbon::parse($month)->month + 1;
+
+            $tasks = $tasks->whereMonth('created_at', $monthNumeric)
+                ->whereYear('created_at', $year);
+        }
+        if ($filterBy == 'year' && $year) {
+            $tasks = $tasks->whereYear('created_at', $year);
+        }
+        if ($filterBy == 'custom' && $custom) {
+            $tasks = $tasks->whereDate('created_at', Carbon::parse($custom)->format('Y-m-d'));
+        }
+
+
+        if ($status) {
+
+            $_status = null;
+
+            switch ($status) {
+                case 'request':
+                    $_status = 0;
+                    $tasks = $tasks->unassigned();
+
+                    break;
+                case 'active':
+                    $_status = 1;
+                    $tasks = $tasks->onGoing();
+
+                    break;
+                case 'pending':
+                    $_status = 2;
+                    $tasks = $tasks->pending();
+
+                    break;
+                case 'cancelled':
+                    $_status = 3;
+                    $tasks = $tasks->cancelled();
+
+                    break;
+                case 'accomplished':
+                    $tasks = $tasks->done();
+
+                    $_status = 4;
+                    break;
+            }
+            // $tasks = $tasks->where('status', $_status);
+        }
+
+        $tasks = $tasks
+            ->orderBy('created_at', 'desc');
+
+
+        // return (new TasksExport($tasks))->download('tasks.xlsx');
+        return Excel::download(new TasksExport($tasks), 'tasks.csv', \Maatwebsite\Excel\Excel::CSV);
     }
 
     /**
@@ -725,7 +842,7 @@ class TaskController extends Controller
         if ($department_id != 10000) $onGoing = $onGoing->where('department_id', $department_id);
 
 
-        $cancelled = Task::where('status', 3);
+        $cancelled = Task::where('status', 3)->where('d_status', 1);
         if ($department_id != 10000) $cancelled = $cancelled->where('department_id', $department_id);
 
         $done = Task::where('status', 4)
