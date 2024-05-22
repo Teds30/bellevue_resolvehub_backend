@@ -381,6 +381,7 @@ class TaskController extends Controller
         $res->pending_marker;
         $res->completed_marker;
         $res->task_images;
+        $res->task_accomplish_images;
 
         if ($res->assignee) $res->assignee->position->department;
         if ($res->assignor) $res->assignor->position->department;

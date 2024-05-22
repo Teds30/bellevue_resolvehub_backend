@@ -9,6 +9,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\ProjectCommentController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskAccomplishImageController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskImageController;
 use App\Http\Controllers\UserController;
@@ -65,7 +66,9 @@ Route::get('issues_recommendation', [TaskController::class, "issues_recommendati
 // Route::get('task_images', [IssueController::class, "index"]);
 // Route::get('task_images/{id}', [IssueController::class, "show"]);
 Route::post('task_images', [TaskImageController::class, "store"]);
+Route::post('task_accomplish_images', [TaskAccomplishImageController::class, "store"]);
 Route::get('task_images/{fileName}', [TaskImageController::class, "showImage"]);
+Route::get('task_accomplish_images/{fileName}', [TaskAccomplishImageController::class, "showImage"]);
 // Route::patch('task_images/{id}', [IssueController::class, "update"]);
 // Route::delete('task_images/{id}', [IssueController::class, "destroy"]);
 

@@ -2,16 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Task_Image;
-use App\Http\Requests\StoreTask_ImageRequest;
-use App\Http\Requests\UpdateTask_ImageRequest;
+use App\Models\TaskAccomplishImage;
+use App\Http\Requests\StoreTaskAccomplishImageRequest;
+use App\Http\Requests\UpdateTaskAccomplishImageRequest;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException as ExceptionFileNotFoundException;
 
-
-#TODO: Task Images Controller
-
-class TaskImageController extends Controller
+class TaskAccomplishImageController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -61,7 +58,7 @@ class TaskImageController extends Controller
             $filePath = $request->file('image')->storeAs($path, $name, 'uploads');
             // Storage::disk('myDisk')->put('/attribute_icons/' . $name, file_get_contents($image));
 
-            $res = Task_Image::create(['task_id' => $task_id, 'url' => $filePath]);
+            $res = TaskAccomplishImage::create(['task_id' => $task_id, 'url' => $filePath]);
 
             return response()->json(['success' => 'Uploaded successfully', 'path' => $path, 'name' => $name, 'image' => $res]);
         }
@@ -71,7 +68,7 @@ class TaskImageController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Task_Image $task_Image)
+    public function show(TaskAccomplishImage $task_Image)
     {
         //
     }
@@ -86,27 +83,10 @@ class TaskImageController extends Controller
         }
     }
 
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Task_Image $task_Image)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateTask_ImageRequest $request, Task_Image $task_Image)
-    {
-        //
-    }
-
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task_Image $task_Image)
+    public function destroy(TaskAccomplishImage $task_Image)
     {
         //
     }

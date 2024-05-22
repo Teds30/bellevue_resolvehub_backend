@@ -64,6 +64,10 @@ class Task extends Model
     {
         return $this->hasMany(Task_Image::class);
     }
+    public function task_accomplish_images()
+    {
+        return $this->hasMany(TaskAccomplishImage::class);
+    }
 
     public static function onGoing()
     {
