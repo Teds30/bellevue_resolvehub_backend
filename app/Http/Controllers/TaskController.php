@@ -97,7 +97,8 @@ class TaskController extends Controller
 
             $startOfWeek = Carbon::now()->startOfWeek(); // Start of the week (Monday)
             $endOfWeek = Carbon::now()->endOfWeek(); // End of the week (Sunday)
-            $tasks = $tasks->whereDate('created_at', [$startOfWeek, $endOfWeek]);
+
+            $tasks = $tasks->whereBetween('created_at', [$startOfWeek, $endOfWeek]);
         }
         if ($filterBy == 'month' && $month && $year) {
 
@@ -117,12 +118,12 @@ class TaskController extends Controller
             $_status = null;
 
             switch ($status) {
-                case 'request':
+                case 'opentask':
                     $_status = 0;
                     $tasks = $tasks->unassigned();
 
                     break;
-                case 'active':
+                case 'ongoing':
                     $_status = 1;
                     $tasks = $tasks->onGoing();
 
