@@ -57,6 +57,7 @@ class ProjectController extends Controller
         $filterBy = $request->input('filter_by', null);
         $departmentId = $request->input('department_id', null);
         $status = $request->input('status', null);
+        $type = $request->input('type', null);
         $searchField = $request->input('searchField', null);
         $search = $request->input('search', null);
         $can_see_all = $request->input('can_see_all', null);
@@ -127,6 +128,20 @@ class ProjectController extends Controller
                     break;
                 case 'rejected':
                     $tasks = $tasks->where('status', 5);
+
+                    break;
+            }
+            // $tasks = $tasks->where('status', $_status);
+        }
+        if ($type) {
+
+            switch ($type) {
+                case 'minor':
+                    $tasks = $tasks->where('type', 0);
+
+                    break;
+                case 'major':
+                    $tasks = $tasks->where('type', 1);
 
                     break;
             }
