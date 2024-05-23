@@ -53,25 +53,31 @@ class ProjectController extends Controller
         $page = $request->input('page', 0); // Default page is 1
         $month = $request->input('month', null);
         $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
         $filterBy = $request->input('filter_by', null);
         $departmentId = $request->input('department_id', null);
+        $status = $request->input('status', null);
         $searchField = $request->input('searchField', null);
         $search = $request->input('search', null);
+        $can_see_all = $request->input('can_see_all', null);
 
-        $tasks = Project::where('d_status', 1)->where('department_id', $departmentId)->with('department');
+        $tasks = Project::where('d_status', 1)->with('department')->with('incharge');
 
+        if ($can_see_all == false) {
+            $tasks = $tasks->where('department_id', $departmentId);
+        }
         if ($searchField && $search) {
             $tasks = $tasks->where($searchField, 'like', "%$search%");
         }
 
-        if ($filterBy == 'today') {
-            $tasks = $tasks->whereDate('created_at', Carbon::today());
+        if ($filterBy == 'daily') {
+            $tasks = $tasks->whereDate('created_at', Carbon::now());
         }
         if ($filterBy == 'this_week') {
 
             $startOfWeek = Carbon::now()->startOfWeek(); // Start of the week (Monday)
             $endOfWeek = Carbon::now()->endOfWeek(); // End of the week (Sunday)
-            $tasks = $tasks->whereDate('created_at', [$startOfWeek, $endOfWeek]);
+            $tasks = $tasks->whereBetween('created_at', [$startOfWeek, $endOfWeek]);
         }
         if ($filterBy == 'month' && $month && $year) {
 
@@ -82,11 +88,9 @@ class ProjectController extends Controller
         if ($filterBy == 'year' && $year) {
             $tasks = $tasks->whereYear('created_at', $year);
         }
-
-        $tasks = $tasks
-            ->orderBy('created_at', 'desc')
-            ->paginate($pageSize, ['*'], 'page', $page);
-
+        if ($filterBy == 'custom' && $custom) {
+            $tasks = $tasks->whereDate('created_at', Carbon::parse($custom)->format('Y-m-d'));
+        }
 
         // Check if any tasks are found
         if (!$tasks || !$tasks->count()) {
@@ -98,9 +102,45 @@ class ProjectController extends Controller
         }
 
 
+        if ($status) {
+
+            switch ($status) {
+                case 'request':
+                    $tasks = $tasks->where('status', 0);
+
+                    break;
+                case 'pending':
+                    $tasks = $tasks->where('status', 1);
+
+                    break;
+                case 'ongoing':
+                    $tasks = $tasks->where('status', 2);
+
+                    break;
+                case 'cancelled':
+                    $tasks = $tasks->where('status', 3);
+
+                    break;
+                case 'accomplished':
+                    $tasks = $tasks->where('status', 4);
+
+                    break;
+                case 'rejected':
+                    $tasks = $tasks->where('status', 5);
+
+                    break;
+            }
+            // $tasks = $tasks->where('status', $_status);
+        }
         // foreach ($tasks as $task) {
         //     $task['row_data'] = ['id' => $task->id, 'name' => $task->issue->name, 'created_at' => $task->created_at];
         // }
+
+        $tasks = $tasks
+            ->orderBy('created_at', 'desc')
+            ->paginate($pageSize, ['*'], 'page', $page);
+
+
 
 
         // Return paginated tasks
@@ -191,13 +231,14 @@ class ProjectController extends Controller
         $custom = $request->input('custom', null);
         $filterBy = $request->input('filter_by', null);
 
-        $res = Project::where('department_id', $id)->where('d_status', 1);
+        $res = Project::where('department_id', $id);
 
         $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
         $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
 
-        $project = Project::where('status', $status)
+        $project = $res->where('status', $status)
             ->where('d_status', 1);
+        // return ['ads' => $project->get()];
 
 
 
@@ -242,6 +283,7 @@ class ProjectController extends Controller
                 }
                 break;
         }
+
 
         $project = $project
             ->paginate($pageSize, ['*'], 'page', $page);
