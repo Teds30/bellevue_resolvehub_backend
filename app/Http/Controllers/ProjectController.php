@@ -67,8 +67,13 @@ class ProjectController extends Controller
         if ($can_see_all == false) {
             $tasks = $tasks->where('department_id', $departmentId);
         }
-        if ($searchField && $search && $searchField != 'In-Charge') {
+        if ($searchField && $search && $searchField != 'In-Charge' && $searchField != 'Department') {
             $tasks = $tasks->where($searchField, 'like', "%$search%");
+        }
+        if ($searchField && $search && $searchField == 'Department') {
+            $searched_departments = Department::where('name', 'like', "%$search%")->pluck('id')
+                ->toArray();
+            $tasks = $tasks->whereIn('department_id', $searched_departments);
         }
         if ($searchField && $search && $searchField == 'In-Charge') {
             $searched_users = User::where('first_name', 'like', "%$search%")->orWhere('last_name', 'like', "%$search%")->pluck('id')
