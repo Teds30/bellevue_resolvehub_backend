@@ -18,7 +18,7 @@ return new class extends Migration
         BEFORE UPDATE ON projects
         FOR EACH ROW
         BEGIN
-        IF (NEW.schedule <= NOW() AND NOW() <= NEW.deadline AND NEW.status != 4 AND NEW.status != 0  AND NEW.status != 5  AND NEW.status != 3) THEN
+        IF (NEW.schedule <= NOW() AND NEW.status != 4 AND NEW.status != 0  AND NEW.status != 5  AND NEW.status != 3) THEN
             SET NEW.status = 2;
         END IF;
         END
@@ -53,6 +53,6 @@ return new class extends Migration
     {
         DB::unprepared('DROP TRIGGER `update_status_ongoing`');
         DB::unprepared('DROP TRIGGER `update_status_pending`');
-        DB::unprepared('DROP TRIGGER `update_status_done`');
+        // DB::unprepared('DROP TRIGGER `update_status_done`');
     }
 };

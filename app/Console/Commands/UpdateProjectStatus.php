@@ -48,14 +48,14 @@ class UpdateProjectStatus extends Command
 
 
 
-        $done = Project::where('deadline', '<', $today)
-            ->where('status', '!=', 0)
-            ->update(['status' => 4]);
+        // $done = Project::where('deadline', '<', $today)
+        //     ->where('status', '!=', 0)
+        //     ->update(['status' => 4]);
 
         $this->info('Project statuses updated successfully.');
         $this->info($onGoing);
         $this->info($pending);
-        $this->info($done);
+        // $this->info($done);
         $this->info($today);
     }
 }
