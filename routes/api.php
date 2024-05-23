@@ -98,9 +98,9 @@ Route::get('projects/{id}', [ProjectController::class, "show"]);
 Route::post('projects', [ProjectController::class, "store"]);
 Route::patch('projects/{id}', [ProjectController::class, "update"]);
 Route::delete('projects/{id}', [ProjectController::class, "destroy"]);
-Route::get('department_projects/{id}', [ProjectController::class, "department_projects"]);
-Route::get('user_projects/{id}', [ProjectController::class, "user_projects"]);
-Route::get('assigned_projects/{id}', [ProjectController::class, "assigned_projects"]);
+Route::get('department_projects/{id}/{day}', [ProjectController::class, "department_projects"]);
+Route::get('assigned_to_projects/{id}/{day}', [ProjectController::class, "user_projects"]);
+Route::get('my_projects/{id}/{day}', [ProjectController::class, "assigned_projects"]);
 Route::get('project-comments/{project_id}', [ProjectCommentController::class, "comments"]);
 Route::post('project-comments', [ProjectCommentController::class, "store"]);
 

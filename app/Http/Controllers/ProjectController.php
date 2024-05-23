@@ -181,12 +181,72 @@ class ProjectController extends Controller
     }
 
 
-    public function department_projects($id)
+    public function department_projects(Request $request, $id, $day)
     {
-        $res = Project::where('department_id', $id)->where('d_status', 1)
-            ->orderBy('updated_at', 'desc')->get();
+        $pageSize = $request->input('page_size', 10); // Default page size is 10
+        $page = $request->input('page', 1);
+        $status = intVal($request->input('status', null));
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
 
-        if (!$res || !$res->count()) {
+        $res = Project::where('department_id', $id)->where('d_status', 1);
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        $project = Project::where('status', $status)
+            ->where('d_status', 1);
+
+
+
+        switch ($day) {
+            case 'daily':
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereDate('created_at', Carbon::now())
+                        ->orderBy('created_at', 'desc');
+                } else {
+
+                    $project = $project->whereDate('updated_at', Carbon::now())
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+            case 'weekly':
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereBetween('created_at', [$startDate, $endDate])
+                        ->orderBy('created_at', 'desc');
+                } else {
+                    $project = $project->whereBetween('updated_at', [$startDate, $endDate])
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+            case 'monthly':
+                // $monthNumeric = Carbon::parse($month)->month + 1;
+
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereMonth('created_at', Carbon::parse($month))
+                        ->orderBy('created_at', 'desc');
+                } else {
+                    $project = $project->whereMonth('updated_at', Carbon::parse($month))
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+            case 'yearly':
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereYear('created_at', $year)
+                        ->orderBy('created_at', 'desc');
+                } else {
+                    $project = $project->whereYear('updated_at', $year)
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+        }
+
+        $project = $project
+            ->paginate($pageSize, ['*'], 'page', $page);
+
+        if (!$project || !$project->count()) {
             return response()->json([
                 "data" => [],
                 "success" => false,
@@ -195,16 +255,78 @@ class ProjectController extends Controller
         }
 
         return [
-            "data" => $res,
+            "data" => $project,
             "success" => true,
         ];
     }
 
-    public function user_projects($id)
+    public function user_projects(Request $request, $id, $day)
     {
-        $res = Project::where('requestor_id', $id)->where('incharge_id', '!=', $id)->where('d_status', 1)->orderBy('updated_at', 'desc')->get();
 
-        if (!$res || !$res->count()) {
+        $pageSize = $request->input('page_size', 10); // Default page size is 10
+        $page = $request->input('page', 1);
+        $status = intVal($request->input('status', null));
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
+
+        $res = Project::where('requestor_id', $id)->where('incharge_id', '!=', $id);
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        $project = $res->where('status', $status)
+            ->where('d_status', 1);
+
+
+
+        switch ($day) {
+            case 'daily':
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereDate('created_at', Carbon::now())
+                        ->orderBy('created_at', 'desc');
+                } else {
+
+                    $project = $project->whereDate('updated_at', Carbon::now())
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+            case 'weekly':
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereBetween('created_at', [$startDate, $endDate])
+                        ->orderBy('created_at', 'desc');
+                } else {
+                    $project = $project->whereBetween('updated_at', [$startDate, $endDate])
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+            case 'monthly':
+                // $monthNumeric = Carbon::parse($month)->month + 1;
+
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereMonth('created_at', Carbon::parse($month))
+                        ->orderBy('created_at', 'desc');
+                } else {
+                    $project = $project->whereMonth('updated_at', Carbon::parse($month))
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+            case 'yearly':
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereYear('created_at', $year)
+                        ->orderBy('created_at', 'desc');
+                } else {
+                    $project = $project->whereYear('updated_at', $year)
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+        }
+
+        $project = $project
+            ->paginate($pageSize, ['*'], 'page', $page);
+
+        if (!$project || !$project->count()) {
             return response()->json([
                 "data" => [],
                 "success" => false,
@@ -213,15 +335,76 @@ class ProjectController extends Controller
         }
 
         return [
-            "data" => $res,
+            "data" => $project,
             "success" => true,
         ];
     }
-    public function assigned_projects($id)
+    public function assigned_projects(Request $request, $id, $day)
     {
-        $res = Project::where('incharge_id', $id)->where('d_status', 1)->orderBy('updated_at', 'desc')->get();
+        $pageSize = $request->input('page_size', 10); // Default page size is 10
+        $page = $request->input('page', 1);
+        $status = intVal($request->input('status', null));
+        $month = $request->input('month', null);
+        $year = $request->input('year', null);
+        $custom = $request->input('custom', null);
+        $filterBy = $request->input('filter_by', null);
 
-        if (!$res || !$res->count()) {
+        $res = Project::where('incharge_id', $id);
+
+        $startDate = now()->startOfWeek()->toDateTimeString(); // Start of the current week
+        $endDate = now()->endOfWeek()->toDateTimeString(); // End of the current week
+
+        $project = $res->where('status', $status)
+            ->where('d_status', 1);
+
+
+
+        switch ($day) {
+            case 'daily':
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereDate('created_at', Carbon::now())
+                        ->orderBy('created_at', 'desc');
+                } else {
+
+                    $project = $project->whereDate('updated_at', Carbon::now())
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+            case 'weekly':
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereBetween('created_at', [$startDate, $endDate])
+                        ->orderBy('created_at', 'desc');
+                } else {
+                    $project = $project->whereBetween('updated_at', [$startDate, $endDate])
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+            case 'monthly':
+                // $monthNumeric = Carbon::parse($month)->month + 1;
+
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereMonth('created_at', Carbon::parse($month))
+                        ->orderBy('created_at', 'desc');
+                } else {
+                    $project = $project->whereMonth('updated_at', Carbon::parse($month))
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+            case 'yearly':
+                if ($status == 0 || $status == 1) {
+                    $project = $project->whereYear('created_at', $year)
+                        ->orderBy('created_at', 'desc');
+                } else {
+                    $project = $project->whereYear('updated_at', $year)
+                        ->orderBy('updated_at', 'desc');
+                }
+                break;
+        }
+
+        $project = $project
+            ->paginate($pageSize, ['*'], 'page', $page);
+
+        if (!$project || !$project->count()) {
             return response()->json([
                 "data" => [],
                 "success" => false,
@@ -230,7 +413,7 @@ class ProjectController extends Controller
         }
 
         return [
-            "data" => $res,
+            "data" => $project,
             "success" => true,
         ];
     }
