@@ -10,6 +10,9 @@ use App\Models\User;
 use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Exports\ProjectsExport;
+use App\Exports\ProjectsPDFExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProjectController extends Controller
 {
@@ -61,6 +64,7 @@ class ProjectController extends Controller
         $searchField = $request->input('searchField', null);
         $search = $request->input('search', null);
         $can_see_all = $request->input('can_see_all', null);
+        $export = $request->input('export', false);
 
         $tasks = Project::where('d_status', 1)->with('department')->with('incharge');
 
@@ -161,6 +165,9 @@ class ProjectController extends Controller
         //     $task['row_data'] = ['id' => $task->id, 'name' => $task->issue->name, 'created_at' => $task->created_at];
         // }
 
+        if ($export) {
+            return Excel::download(new ProjectsExport($tasks), 'projects.csv', \Maatwebsite\Excel\Excel::CSV);
+        }
         $tasks = $tasks
             ->orderBy('created_at', 'desc')
             ->paginate($pageSize, ['*'], 'page', $page);
@@ -175,6 +182,18 @@ class ProjectController extends Controller
             "message" => "Projects fetched successfully."
         ], 200);
     }
+
+    // public function exportPdf(Request $request)
+    // {
+    //     $tasks = Projects::where('d_status', )
+
+    //         $projectsExport = new ProjectsExport($tasks);
+    //     $html = $projectsExport->view()->render();
+
+    //     $pdf = Pdf::loadHTML($html);
+
+    //     return $pdf->download('projects.pdf');
+    // }
 
     /**
      * Show the form for creating a new resource.

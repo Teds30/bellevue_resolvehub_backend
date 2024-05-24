@@ -54,4 +54,41 @@ class Project extends Model
     {
         return $this->hasMany(ProjectComment::class);
     }
+
+
+    public static function getStatus($task)
+    {
+        $isOnGoing = Project::where('status', 2)
+            ->where('id', $task->id)
+            ->exists();
+        $isPending = Project::where('status', 1)
+            ->where('id', $task->id)
+            ->exists();
+        $isRequest = Project::where('status', 0)
+            ->where('id', $task->id)
+            ->exists();
+        $isDone = Project::where('status', 4)
+            ->where('id', $task->id)
+            ->exists();
+        $isCancelled = Project::where('status', 3)
+            ->where('id', $task->id)
+            ->exists();
+        $isRejected = Project::where('status', 5)
+            ->where('id', $task->id)
+            ->exists();
+
+        if ($isOnGoing) {
+            return 'on-going';
+        } elseif ($isPending) {
+            return 'pending';
+        } elseif ($isRequest) {
+            return 'request';
+        } elseif ($isDone) {
+            return 'done';
+        } elseif ($isCancelled) {
+            return 'cancelled';
+        } elseif ($isRejected) {
+            return 'rejected';
+        }
+    }
 }

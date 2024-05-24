@@ -85,7 +85,6 @@ Route::get('user_assigned_projects/{id}', [UserController::class, "user_assigned
 Route::get('user_raised_issues/{id}', [UserController::class, "user_raised_issues"]);
 Route::post('projects_page', [ProjectController::class, "paginate"]);
 
-
 Route::get('tasks', [TaskController::class, "index"]);
 Route::post('tasks_page', [TaskController::class, "paginate"]);
 Route::get('tasks/{id}', [TaskController::class, "show"]);
@@ -154,5 +153,6 @@ Route::get('top_departments', [DepartmentController::class, "top_departments"]);
 
 
 Route::post('tasks_export', [TaskController::class, "export"]);
+// Route::post('projects_export', [ProjectController::class, "export"]);
 
 // Route::post('register', [AuthController::class, "register"]);
