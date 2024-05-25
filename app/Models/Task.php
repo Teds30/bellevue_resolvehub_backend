@@ -69,36 +69,36 @@ class Task extends Model
         return $this->hasMany(TaskAccomplishImage::class);
     }
 
-    public static function onGoing()
+    public function scopeOnGoing($query)
     {
-        return self::whereDate('schedule', '<=', Carbon::today())
+        return $query->whereDate('schedule', '<=', Carbon::today())
             ->where('completed_marker_id', null)
             ->where('d_status', 1)
             ->where('status', '!=', 3);
     }
-    public static function pending()
+    public function scopePending($query)
     {
-        return self::whereDate('schedule', '>', Carbon::today())
+        return $query->whereDate('schedule', '>', Carbon::today())
             ->where('completed_marker_id', null)
             ->where('d_status', 1);
     }
-    public static function unassigned()
+    public function scopeUnassigned($query)
     {
-        return self::where('assignee_id', null)
+        return $query->where('assignee_id', null)
             ->where('status', 0)->where('d_status', 1);
     }
-    public static function cancelled()
+    public function scopeCancelled($query)
     {
-        return self::where('status', 3)->where('d_status', 1);
+        return $query->where('status', 3)->where('d_status', 1);
     }
-    public static function done()
+    public function scopeDone($query)
     {
-        return self::where('status', 4)
+        return $query->where('status', 4)
             ->where('completed_marker_id', '!=', null)
             ->where('d_status', 1);
     }
 
-    public static function getStatus($task)
+    public function getStatus($task)
     {
         $isOnGoing = Task::onGoing()
             ->where('id', $task->id)
